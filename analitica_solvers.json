@@ -1,0 +1,295 @@
+,
+  {
+    "solver": "Apache Commons Math",
+    "factible": true,
+    "costo_optimo": 24.0000,
+    "tiempo_ms": 117,
+    "variables_activas": {
+      "y_02": 1.0000,
+      "y_03": 0.0000,
+      "y_04": 0.0000,
+      "y_05": 0.0000,
+      "y_06": 1.0000,
+      "x_06": 10.0000,
+      "x_05": 0.0000,
+      "x_04": 0.0000,
+      "x_03": 0.0000,
+      "x_02": 10.0000,
+      "y_01": 0.0000,
+      "x_01": 0.0000
+    }
+  },
+  {
+    "solver": "HiGHS",
+    "factible": false,
+    "costo_optimo": 0.0000,
+    "tiempo_ms": 95,
+    "variables_activas": {
+    }
+  },
+  {
+    "solver": "GLPK",
+    "factible": false,
+    "costo_optimo": 0.0000,
+    "tiempo_ms": 73,
+    "variables_activas": {
+    }
+  }
+,
+  {
+    "solver": "Apache Commons Math",
+    "factible": true,
+    "costo_optimo": 24.0000,
+    "tiempo_ms": 109,
+    "variables_activas": {
+      "y_02": 1.0000,
+      "y_03": 0.0000,
+      "y_04": 0.0000,
+      "y_05": 0.0000,
+      "y_06": 1.0000,
+      "x_06": 10.0000,
+      "x_05": 0.0000,
+      "x_04": 0.0000,
+      "x_03": 0.0000,
+      "x_02": 10.0000,
+      "y_01": 0.0000,
+      "x_01": 0.0000
+    }
+  },
+  {
+    "solver": "HiGHS",
+    "factible": true,
+    "costo_optimo": 24.0000,
+    "tiempo_ms": 225,
+    "variables_activas": {
+      "y_02": 1.0000,
+      "y_03": 0.0000,
+      "y_04": 0.0000,
+      "y_05": 0.0000,
+      "y_06": 1.0000,
+      "x_06": 10.0000,
+      "x_05": 0.0000,
+      "x_04": 0.0000,
+      "x_03": 0.0000,
+      "x_02": 10.0000,
+      "y_01": 0.0000,
+      "x_01": 0.0000
+    }
+  },
+  {
+    "solver": "GLPK",
+    "factible": false,
+    "costo_optimo": 0.0000,
+    "tiempo_ms": 70,
+    "variables_activas": {
+    }
+  }
+,
+  {
+    "solver": "Apache Commons Math",
+    "factible": true,
+    "costo_optimo": 24.0000,
+    "tiempo_ms": 143,
+    "variables_activas": {
+      "y_02": 1.0000,
+      "y_03": 0.0000,
+      "y_04": 0.0000,
+      "y_05": 0.0000,
+      "y_06": 1.0000,
+      "x_06": 10.0000,
+      "x_05": 0.0000,
+      "x_04": 0.0000,
+      "x_03": 0.0000,
+      "x_02": 10.0000,
+      "y_01": 0.0000,
+      "x_01": 0.0000
+    }
+  },
+  {
+    "solver": "HiGHS",
+    "factible": true,
+    "costo_optimo": 24.0000,
+    "tiempo_ms": 193,
+    "variables_activas": {
+      "y_02": 1.0000,
+      "y_03": 0.0000,
+      "y_04": 0.0000,
+      "y_05": 0.0000,
+      "y_06": 1.0000,
+      "x_06": 10.0000,
+      "x_05": 0.0000,
+      "x_04": 0.0000,
+      "x_03": 0.0000,
+      "x_02": 10.0000,
+      "y_01": 0.0000,
+      "x_01": 0.0000
+    }
+  },
+  {
+    "solver": "GLPK",
+    "factible": false,
+    "costo_optimo": 0.0000,
+    "tiempo_ms": 94,
+    "variables_activas": {
+    }
+  }
+,
+  {
+    "solver": "Apache Commons Math",
+    "factible": true,
+    "costo_optimo": 24.0000,
+    "tiempo_ms": 134,
+    "variables_activas": {
+      "y_02": 1.0000,
+      "y_03": 0.0000,
+      "y_04": 0.0000,
+      "y_05": 0.0000,
+      "y_06": 1.0000,
+      "x_06": 10.0000,
+      "x_05": 0.0000,
+      "x_04": 0.0000,
+      "x_03": 0.0000,
+      "x_02": 10.0000,
+      "y_01": 0.0000,
+      "x_01": 0.0000
+    }
+  },
+  {
+    "solver": "HiGHS",
+    "factible": true,
+    "costo_optimo": 24.0000,
+    "tiempo_ms": 164,
+    "variables_activas": {
+      "y_02": 1.0000,
+      "y_03": 0.0000,
+      "y_04": 0.0000,
+      "y_05": 0.0000,
+      "y_06": 1.0000,
+      "x_06": 10.0000,
+      "x_05": 0.0000,
+      "x_04": 0.0000,
+      "x_03": 0.0000,
+      "x_02": 10.0000,
+      "y_01": 0.0000,
+      "x_01": 0.0000
+    }
+  },
+  {
+    "solver": "GLPK",
+    "factible": false,
+    "costo_optimo": 0.0000,
+    "tiempo_ms": 91,
+    "variables_activas": {
+    }
+  }
+,
+  {
+    "solver": "Apache Commons Math",
+    "factible": true,
+    "costo_optimo": 24.0000,
+    "tiempo_ms": 114,
+    "variables_activas": {
+      "y_02": 1.0000,
+      "y_03": 0.0000,
+      "y_04": 0.0000,
+      "y_05": 0.0000,
+      "y_06": 1.0000,
+      "x_06": 10.0000,
+      "x_05": 0.0000,
+      "x_04": 0.0000,
+      "x_03": 0.0000,
+      "x_02": 10.0000,
+      "y_01": 0.0000,
+      "x_01": 0.0000
+    }
+  },
+  {
+    "solver": "HiGHS",
+    "factible": true,
+    "costo_optimo": 24.0000,
+    "tiempo_ms": 206,
+    "variables_activas": {
+      "y_02": 1.0000,
+      "y_03": 0.0000,
+      "y_04": 0.0000,
+      "y_05": 0.0000,
+      "y_06": 1.0000,
+      "x_06": 10.0000,
+      "x_05": 0.0000,
+      "x_04": 0.0000,
+      "x_03": 0.0000,
+      "x_02": 10.0000,
+      "y_01": 0.0000,
+      "x_01": 0.0000
+    }
+  },
+  {
+    "solver": "GLPK",
+    "factible": false,
+    "costo_optimo": 0.0000,
+    "tiempo_ms": 101,
+    "variables_activas": {
+    }
+  }
+,
+  {
+    "solver": "Apache Commons Math",
+    "factible": true,
+    "costo_optimo": 24.0000,
+    "tiempo_ms": 92,
+    "variables_activas": {
+      "y_02": 1.0000,
+      "y_03": 0.0000,
+      "y_04": 0.0000,
+      "y_05": 0.0000,
+      "y_06": 1.0000,
+      "x_06": 10.0000,
+      "x_05": 0.0000,
+      "x_04": 0.0000,
+      "x_03": 0.0000,
+      "x_02": 10.0000,
+      "y_01": 0.0000,
+      "x_01": 0.0000
+    }
+  },
+  {
+    "solver": "HiGHS",
+    "factible": true,
+    "costo_optimo": 24.0000,
+    "tiempo_ms": 96,
+    "variables_activas": {
+      "y_02": 1.0000,
+      "y_03": 0.0000,
+      "y_04": 0.0000,
+      "y_05": 0.0000,
+      "y_06": 1.0000,
+      "x_06": 10.0000,
+      "x_05": 0.0000,
+      "x_04": 0.0000,
+      "x_03": 0.0000,
+      "x_02": 10.0000,
+      "y_01": 0.0000,
+      "x_01": 0.0000
+    }
+  },
+  {
+    "solver": "GLPK",
+    "factible": true,
+    "costo_optimo": 24.0000,
+    "tiempo_ms": 67,
+    "variables_activas": {
+      "y_02": 1.0000,
+      "y_03": 0.0000,
+      "y_04": 0.0000,
+      "y_05": 0.0000,
+      "y_06": 1.0000,
+      "x_06": 10.0000,
+      "x_05": 0.0000,
+      "x_04": 0.0000,
+      "x_03": 0.0000,
+      "x_02": 10.0000,
+      "y_01": 0.0000,
+      "x_01": 0.0000
+    }
+  }
+]

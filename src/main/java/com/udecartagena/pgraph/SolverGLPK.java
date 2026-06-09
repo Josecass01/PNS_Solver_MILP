@@ -1,36 +1,49 @@
 package com.udecartagena.pgraph;
 
 import java.io.*;
+import java.nio.file.*;
 import java.util.*;
 
-public class SolverGLPK {
+public class SolverGLPK implements SolverMILP {
 
+    // glpsol.exe debe estar en la raíz del proyecto, igual que highs.exe
     private static final String GLPK = new File("glpsol.exe").getAbsolutePath();
+
     private final PGraph pgraph;
 
     public SolverGLPK(PGraph pgraph) {
         this.pgraph = pgraph;
     }
 
-    public void resolver() {
+    @Override
+    public ResultadoSolucion resolver() {
         System.out.println("\n=== Solver: GLPK (GNU Linear Programming Kit) ===");
 
         try {
-            File lp  = File.createTempFile("pns_glpk_", ".lp");
-            File sol = File.createTempFile("pns_glpk_", ".sol");
-            lp.deleteOnExit();
-            sol.deleteOnExit();
+            // Crear archivos temporales en el directorio de trabajo del proyecto
+            // (NO en %TEMP%) para evitar problemas con rutas que tienen espacios
+            // o caracteres especiales en Windows
+            File dirTrabajo = new File(".").getAbsoluteFile();
+            File lp  = new File(dirTrabajo, "pns_glpk_temp.lp");
+            File sol = new File(dirTrabajo, "pns_glpk_temp.sol");
 
             generarLP(lp);
 
             long inicio = System.currentTimeMillis();
-            ejecutar(lp, sol);
+            String errorEjecucion = ejecutar(lp, sol);
             long tiempo = System.currentTimeMillis() - inicio;
 
-            parsearYMostrar(sol, tiempo);
+            ResultadoSolucion resultado = parsearYMostrar(sol, tiempo, errorEjecucion);
+
+            // Limpiar archivos temporales
+            lp.delete();
+            sol.delete();
+
+            return resultado;
 
         } catch (Exception e) {
             System.err.println("Error crítico ejecutando GLPK: " + e.getMessage());
+            return new ResultadoSolucion("GLPK", false, 0.0, 0, new HashMap<>());
         }
     }
 
@@ -46,35 +59,30 @@ public class SolverGLPK {
             pw.println(obj.toString());
 
             pw.println("Subject To");
-
             for (UnidadOperativa u : us) {
-                pw.printf(Locale.US, " cap_%s: x_%s - %.4f y_%s <= 0%n", u.getId(), u.getId(), u.getCapacityUpperBound(), u.getId());
+                pw.printf(Locale.US, " cap_%s: x_%s - %.4f y_%s <= 0%n",
+                        u.getId(), u.getId(), u.getCapacityUpperBound(), u.getId());
             }
 
             for (Material m : pgraph.getMateriales()) {
                 if (m.getTipo().equals("raw_material")) continue;
-
                 StringJoiner expr = new StringJoiner(" ");
                 boolean tieneTerminos = false;
-
                 for (Flujo f : pgraph.getFlujos()) {
-                    if (f.getIdMaterialSalida().equals(m.getId())) {
+                    if (f.getIdMaterialSalida() != null && f.getIdMaterialSalida().equals(m.getId())) {
                         expr.add(tieneTerminos ? "+ x_" + f.getIdUnidadOperativa() : "x_" + f.getIdUnidadOperativa());
                         tieneTerminos = true;
                     }
-                }
-                for (Flujo f : pgraph.getFlujos()) {
-                    if (f.getIdMaterialEntrada().equals(m.getId())) {
+                    if (f.getIdMaterialEntrada() != null && f.getIdMaterialEntrada().equals(m.getId())) {
                         expr.add("- x_" + f.getIdUnidadOperativa());
                         tieneTerminos = true;
                     }
                 }
-
                 if (tieneTerminos) {
                     if (m.getTipo().equals("product")) {
-                        pw.printf(Locale.US, " bal_%s: %s >= %.4f%n", m.getId(), expr.toString(), m.getFlowRateLowerBound());
+                        pw.printf(Locale.US, " bal_%s: %s >= %.4f%n", m.getId(), expr, m.getFlowRateLowerBound());
                     } else {
-                        pw.printf(Locale.US, " bal_%s: %s >= 0.0%n", m.getId(), expr.toString());
+                        pw.printf(Locale.US, " bal_%s: %s >= 0.0%n", m.getId(), expr);
                     }
                 }
             }
@@ -83,7 +91,6 @@ public class SolverGLPK {
             for (UnidadOperativa u : us) {
                 pw.printf(Locale.US, " x_%s >= 0%n", u.getId());
             }
-
             pw.println("Binaries");
             for (UnidadOperativa u : us) {
                 pw.printf(" y_%s%n", u.getId());
@@ -92,80 +99,118 @@ public class SolverGLPK {
         }
     }
 
-    private void ejecutar(File lp, File sol) throws IOException, InterruptedException {
-        ProcessBuilder pb = new ProcessBuilder(GLPK, "--lp", lp.getAbsolutePath(), "--output", sol.getAbsolutePath());
-        pb.redirectErrorStream(true);
+    // Retorna el stderr capturado para diagnóstico
+    private String ejecutar(File lp, File sol) throws IOException, InterruptedException {
+        ProcessBuilder pb = new ProcessBuilder(
+                GLPK,
+                "--lp", lp.getAbsolutePath(),
+                "-o",   sol.getAbsolutePath()
+        );
+        pb.redirectErrorStream(false); // separar stdout y stderr
+
         Process proceso = pb.start();
 
-        /* Es obligatorio vaciar el búfer del stream del proceso externo para evitar
-           que se llene la memoria asignada por el SO y congele indefinidamente el ejecutable. */
+        // Leer stdout (output normal de glpsol)
+        StringBuilder stdout = new StringBuilder();
         try (BufferedReader br = new BufferedReader(new InputStreamReader(proceso.getInputStream()))) {
-            while (br.readLine() != null) {
-                // Consumo silencioso de la consola nativa de GLPK
-            }
+            String linea;
+            while ((linea = br.readLine()) != null) stdout.append(linea).append("\n");
         }
-        proceso.waitFor();
+
+        // Leer stderr (errores de glpsol, por ej. DLL no encontrada)
+        StringBuilder stderr = new StringBuilder();
+        try (BufferedReader br = new BufferedReader(new InputStreamReader(proceso.getErrorStream()))) {
+            String linea;
+            while ((linea = br.readLine()) != null) stderr.append(linea).append("\n");
+        }
+
+        int exitCode = proceso.waitFor();
+
+        // Imprimir diagnóstico si algo salió mal
+        if (exitCode != 0 || stderr.length() > 0) {
+            System.out.println("[GLPK diagnóstico] Exit code: " + exitCode);
+            if (stderr.length() > 0)
+                System.out.println("[GLPK stderr]: " + stderr.toString().trim());
+        }
+
+        return stderr.toString();
     }
 
-    private void parsearYMostrar(File sol, long tiempoMs) throws IOException {
+    private ResultadoSolucion parsearYMostrar(File sol, long tiempoMs, String errorEjecucion) throws IOException {
+        if (!sol.exists() || sol.length() == 0) {
+            System.out.println("GLPK no generó archivo de solución.");
+            if (!errorEjecucion.isEmpty())
+                System.out.println("Error del proceso: " + errorEjecucion.trim());
+            System.out.println("Verifica: 1) glpsol.exe está en la raíz del proyecto");
+            System.out.println("          2) Windows Defender no lo está bloqueando");
+            System.out.println("          3) El .dll de GLPK está junto al .exe");
+            return new ResultadoSolucion("GLPK", false, 0.0, tiempoMs, new HashMap<>());
+        }
+
         double objetivo = Double.MAX_VALUE;
-        Map<String, Double> valoresVariables = new HashMap<>();
+        Map<String, Double> valores = new HashMap<>();
+        boolean enColumnas = false;
 
         try (BufferedReader br = new BufferedReader(new FileReader(sol))) {
             String linea;
             while ((linea = br.readLine()) != null) {
                 linea = linea.trim();
+                if (linea.isEmpty()) continue;
 
+                // "Objective:  obj = 24 (MINimum)"
                 if (linea.startsWith("Objective:")) {
-                    String[] partes = linea.split("=");
-                    if (partes.length >= 2) {
-                        /* Se eliminan sufijos textuales añadidos por GLPK (ej: "(MINimum)") para aislar el valor numérico */
-                        String valorStr = partes[1].replaceAll("\\([^)]*\\)", "").trim();
-                        try {
-                            objetivo = Double.parseDouble(valorStr);
-                        } catch (NumberFormatException ignored) {}
-                    }
+                    try {
+                        String num = linea.split("=")[1].trim().split("\\s+")[0];
+                        objetivo = Double.parseDouble(num);
+                    } catch (Exception ignored) {}
                 }
 
-                if (linea.contains("y_") || linea.contains("x_")) {
-                    String[] tokens = linea.split("\\s+");
-                    for (int i = 0; i < tokens.length; i++) {
-                        if (tokens[i].startsWith("y_") || tokens[i].startsWith("x_")) {
-                            String nombreVar = tokens[i];
-                            /* GLPK formatea filas con variables agregando un token de estado ("*", "NL", "B") antes del valor real.
-                               Este bloque intercepta de forma dinámica la posición correcta del dato numérico. */
-                            if (i + 1 < tokens.length) {
-                                try {
-                                    double val = Double.parseDouble(tokens[i + 1]);
-                                    valoresVariables.put(nombreVar, val);
-                                } catch (NumberFormatException e) {
-                                    if (i + 2 < tokens.length) {
-                                        try {
-                                            valoresVariables.put(nombreVar, Double.parseDouble(tokens[i + 2]));
-                                        } catch (NumberFormatException ignored) {}
-                                    }
-                                }
+                if (linea.contains("Column name") && linea.contains("Activity")) {
+                    enColumnas = true;
+                    continue;
+                }
+                if (enColumnas && linea.startsWith("------")) continue;
+                if (enColumnas && (linea.startsWith("Integer") || linea.startsWith("KKT"))) {
+                    enColumnas = false;
+                    continue;
+                }
+
+                // Formato GLPK:
+                // variable binaria:  "  3 y_02  *  1  0  1"   -> t[2]="*", valor en t[3]
+                // variable continua: "  4 x_02     10  0   "   -> valor en t[2]
+                if (enColumnas) {
+                    String[] t = linea.split("\\s+");
+                    if (t.length >= 3) {
+                        String nombre = t[1];
+                        try {
+                            double valor;
+                            if (t[2].equals("*")) {
+                                valor = t.length >= 4 ? Double.parseDouble(t[3]) : 0.0;
+                            } else {
+                                valor = Double.parseDouble(t[2]);
                             }
-                            break;
-                        }
+                            valores.put(nombre, valor);
+                        } catch (NumberFormatException ignored) {}
                     }
                 }
             }
         }
 
         if (objetivo == Double.MAX_VALUE) {
-            System.out.println("GLPK determinó que el modelo es infactible o no se pudo procesar.");
-            return;
+            System.out.println("GLPK: no se encontró valor objetivo en el archivo de solución.");
+            return new ResultadoSolucion("GLPK", false, 0.0, tiempoMs, new HashMap<>());
         }
 
         System.out.printf("Costo mínimo (Z) : %.4f%n", objetivo);
         System.out.println("Unidades operativas:");
         for (UnidadOperativa u : pgraph.getUnidadesOperativas()) {
-            int y = (int) Math.round(valoresVariables.getOrDefault("y_" + u.getId(), 0.0));
-            double x = valoresVariables.getOrDefault("x_" + u.getId(), 0.0);
+            int    y = (int) Math.round(valores.getOrDefault("y_" + u.getId(), 0.0));
+            double x = valores.getOrDefault("x_" + u.getId(), 0.0);
             System.out.printf("  %-4s  y=%d (%s)   x=%.4f%n",
                     u.getId(), y, y == 1 ? "ACTIVA  " : "inactiva", x);
         }
         System.out.printf("Tiempo de ejecución: %d ms%n", tiempoMs);
+
+        return new ResultadoSolucion("GLPK", true, objetivo, tiempoMs, valores);
     }
 }
