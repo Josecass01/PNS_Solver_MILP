@@ -97,13 +97,15 @@ public class SolverHiGHS implements SolverMILP {
     }
 
     private void ejecutar(File lp, File sol) throws IOException, InterruptedException {
-        ProcessBuilder pb = new ProcessBuilder(HIGHS, "--model_file", lp.getAbsolutePath(), "--solution_file", sol.getAbsolutePath());
-        pb.redirectErrorStream(true);
+        // CORRECCIÓN 1: Comando exacto para que el ejecutable arranque bien
+        ProcessBuilder pb = new ProcessBuilder(
+                HIGHS,
+                lp.getAbsolutePath(),
+                "--solution_file=" + sol.getAbsolutePath()
+        );
+        pb.redirectOutput(ProcessBuilder.Redirect.DISCARD);
+        pb.redirectError(ProcessBuilder.Redirect.DISCARD);
         Process proceso = pb.start();
-
-        try (BufferedReader br = new BufferedReader(new InputStreamReader(proceso.getInputStream()))) {
-            while (br.readLine() != null) {}
-        }
         proceso.waitFor();
     }
 
@@ -146,14 +148,21 @@ public class SolverHiGHS implements SolverMILP {
 
         System.out.println("Costo mínimo (Z) : " + objetivo);
         System.out.println("Unidades operativas:");
+
+        // CORRECCIÓN 2: Inyectar variables en 0 para la interfaz gráfica
         for (UnidadOperativa u : pgraph.getUnidadesOperativas()) {
-            int y = (int) Math.round(valores.getOrDefault("y_" + u.getId(), 0.0));
-            double x = valores.getOrDefault("x_" + u.getId(), 0.0);
+            String claveY = "y_" + u.getId();
+            String claveX = "x_" + u.getId();
+
+            valores.putIfAbsent(claveY, 0.0);
+            valores.putIfAbsent(claveX, 0.0);
+
+            int y = (int) Math.round(valores.get(claveY));
+            double x = valores.get(claveX);
             System.out.printf("  %-4s  y=%d (%s)   x=%.4f%n", u.getId(), y, y == 1 ? "ACTIVA  " : "inactiva", x);
         }
         System.out.printf("Tiempo de ejecución: %d ms%n", tiempoMs);
 
-        // Retornamos el objeto unificado incluyendo el mapa completo con las variables de decisión (x_i, y_i)
         return new ResultadoSolucion("HiGHS", true, objetivo, tiempoMs, valores);
     }
 }
