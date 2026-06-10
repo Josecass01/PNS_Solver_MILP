@@ -36,4 +36,17 @@ build/
 .vscode/
 
 ### Mac OS ###
-.DS_Store
+.
+# --- REGLAS ESPECÍFICAS DEL PROYECTO PNS ---
+# Ignorar los archivos de texto basura que generan los motores al calcular
+*.log
+gurobi.log
+Highs.log
+
+# Forzar a Git a subir los ejecutables, el caso de estudio y la librería
+!gurobi.jar
+!gurobi.lic
+!glpsol.exe
+!highs.exe
+!glpk_4_65.dll
+!caso_estudio.txt

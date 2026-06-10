@@ -1,5 +1,11 @@
 package com.udecartagena.pgraph;
 
+import org.jfree.chart.ChartFactory;
+import org.jfree.chart.ChartPanel;
+import org.jfree.chart.JFreeChart;
+import org.jfree.chart.plot.PlotOrientation;
+import org.jfree.data.category.DefaultCategoryDataset;
+
 import javax.swing.*;
 import javax.swing.table.DefaultTableModel;
 import java.awt.*;
@@ -12,7 +18,7 @@ import java.util.Map;
 
 public class VentanaPrincipal extends JFrame {
 
-    // Componentes del Front-End (Interfaz Gráfica)
+    // Componentes del Front-End
     private JTextField txtRutaArchivo;
     private JButton btnCargar;
     private JComboBox<String> comboSolvers;
@@ -22,36 +28,28 @@ public class VentanaPrincipal extends JFrame {
     private DefaultTableModel modeloTabla;
     private JLabel lblTotalSoluciones;
 
-    // Estado del Back-End
     private PGraph modeloActual = null;
     private final String ARCHIVO_JSON = "analitica_solvers.json";
 
     public VentanaPrincipal() {
-        // Configuración básica de la ventana de Windows
         setTitle("PNS Solver MILP - Universidad de Cartagena");
         setSize(950, 680);
         setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
         setLocationRelativeTo(null);
         setLayout(new BorderLayout(10, 10));
 
-        // Inicializar componentes visuales de Swing
         inicializarComponentes();
-
-        // Cargar el historial del JSON en la tabla inmediatamente al encender la pantalla
         actualizarTablaHistorial();
     }
 
     private void inicializarComponentes() {
-        // ---------------------------------------------------------------------
-        // PANEL SUPERIOR: Carga de Modelo y Selección de Solver
-        // ---------------------------------------------------------------------
+        // PANEL SUPERIOR
         JPanel panelSuperior = new JPanel(new GridBagLayout());
         panelSuperior.setBorder(BorderFactory.createTitledBorder("Configuración del Problema"));
         GridBagConstraints gbc = new GridBagConstraints();
         gbc.insets = new Insets(5, 5, 5, 5);
         gbc.fill = GridBagConstraints.HORIZONTAL;
 
-        // Fila 1: Selector del archivo .txt del P-Graph
         gbc.gridx = 0; gbc.gridy = 0;
         panelSuperior.add(new JLabel("Modelo P-Graph (.txt):"), gbc);
 
@@ -65,7 +63,6 @@ public class VentanaPrincipal extends JFrame {
         btnCargar.addActionListener(e -> accionCargarArchivo());
         panelSuperior.add(btnCargar, gbc);
 
-        // Fila 2: Selector del motor matemático (Solver)
         gbc.gridx = 0; gbc.gridy = 1; gbc.weightx = 0.0;
         panelSuperior.add(new JLabel("Seleccionar Solver MILP:"), gbc);
 
@@ -74,6 +71,7 @@ public class VentanaPrincipal extends JFrame {
                 "Apache Commons Math (Interno B&B)",
                 "HiGHS (Ejecutable portable)",
                 "GLPK (Ejecutable portable)",
+                "Gurobi (Motor Comercial Avanzado)",
                 "Ejecutar TODOS en lote (Comparativa)"
         };
         comboSolvers = new JComboBox<>(opcionesSolvers);
@@ -81,19 +79,16 @@ public class VentanaPrincipal extends JFrame {
 
         gbc.gridx = 2; gbc.gridy = 1; gbc.weightx = 0.0;
         btnOptimizar = new JButton("Ejecutar Optimización");
-        btnOptimizar.setEnabled(false); // Desactivado hasta que carguen un archivo estructurado
+        btnOptimizar.setEnabled(false);
         btnOptimizar.addActionListener(e -> accionEjecutarSolver());
         panelSuperior.add(btnOptimizar, gbc);
 
         add(panelSuperior, BorderLayout.NORTH);
 
-        // ---------------------------------------------------------------------
-        // PANEL CENTRAL: Resultados actuales y Tabla comparativa (Analítica)
-        // ---------------------------------------------------------------------
+        // PANEL CENTRAL
         JPanel panelCentral = new JPanel(new GridLayout(2, 1, 10, 10));
         panelCentral.setBorder(BorderFactory.createEmptyBorder(0, 10, 0, 10));
 
-        // Subpanel 1: Visualización detallada de la solución actual (Variables activas y Z)
         JPanel panelResultadosActuales = new JPanel(new BorderLayout());
         panelResultadosActuales.setBorder(BorderFactory.createTitledBorder("Resultados de la Solución Actual (Variables Activas)"));
         areaResultados = new JTextArea();
@@ -102,7 +97,6 @@ public class VentanaPrincipal extends JFrame {
         panelResultadosActuales.add(new JScrollPane(areaResultados), BorderLayout.CENTER);
         panelCentral.add(panelResultadosActuales);
 
-        // Subpanel 2: Sección de comparación analítica (Historial del JSON jerárquico)
         JPanel panelComparacion = new JPanel(new BorderLayout());
         panelComparacion.setBorder(BorderFactory.createTitledBorder("Analítica Comparativa Histórica (Respaldo JSON Estructurado)"));
 
@@ -114,29 +108,30 @@ public class VentanaPrincipal extends JFrame {
         panelCentral.add(panelComparacion);
         add(panelCentral, BorderLayout.CENTER);
 
-        // ---------------------------------------------------------------------
-        // PANEL INFERIOR: Barra de estado e indicadores métricos
-        // ---------------------------------------------------------------------
-        JPanel panelInferior = new JPanel(new FlowLayout(FlowLayout.LEFT));
+        // PANEL INFERIOR (Con el nuevo botón de gráficos)
+        JPanel panelInferior = new JPanel(new BorderLayout());
+        panelInferior.setBorder(BorderFactory.createEmptyBorder(5, 10, 10, 10));
+
         lblTotalSoluciones = new JLabel("Cantidad de soluciones almacenadas en el historial: 0");
-        panelInferior.add(lblTotalSoluciones);
+        panelInferior.add(lblTotalSoluciones, BorderLayout.WEST);
+
+        JButton btnGrafico = new JButton("Visualizar Gráfico de Tiempos");
+        btnGrafico.setFont(new Font("SansSerif", Font.BOLD, 12));
+        btnGrafico.addActionListener(e -> mostrarGraficoBarras());
+        panelInferior.add(btnGrafico, BorderLayout.EAST);
+
         add(panelInferior, BorderLayout.SOUTH);
     }
-
-    // =========================================================================
-    // LÓGICA DE INTERACCIÓN Y PROCESAMIENTO (CONTROLADORES)
-    // =========================================================================
 
     private void accionCargarArchivo() {
         JFileChooser selector = new JFileChooser();
         selector.setDialogTitle("Seleccione el archivo del modelo P-Graph");
-        selector.setCurrentDirectory(new File(".")); // Inicia en la raíz del proyecto
+        selector.setCurrentDirectory(new File("."));
 
         int resultado = selector.showOpenDialog(this);
         if (resultado == JFileChooser.APPROVE_OPTION) {
             File archivoSeleccionado = selector.getSelectedFile();
             try {
-                // Invocamos tu lector topológico del Back-End
                 modeloActual = LectorPGraph.leerArchivo(archivoSeleccionado.getAbsolutePath());
                 txtRutaArchivo.setText(archivoSeleccionado.getName());
                 areaResultados.setText("Modelo topológico cargado con éxito.\n" +
@@ -145,7 +140,7 @@ public class VentanaPrincipal extends JFrame {
                         "Selecciona un solver y presiona 'Ejecutar Optimización'.");
                 btnOptimizar.setEnabled(true);
             } catch (Exception ex) {
-                JOptionPane.showMessageDialog(this, "Error al interpretar la topología del archivo P-Graph:\n" + ex.getMessage(), "Error de Carga", JOptionPane.ERROR_MESSAGE);
+                JOptionPane.showMessageDialog(this, "Error al cargar:\n" + ex.getMessage(), "Error", JOptionPane.ERROR_MESSAGE);
             }
         }
     }
@@ -156,32 +151,26 @@ public class VentanaPrincipal extends JFrame {
         int indiceSolver = comboSolvers.getSelectedIndex();
         List<SolverMILP> solversAEjecutar = new ArrayList<>();
 
-        // Mapeo polimórfico según la opción de la interfaz de usuario
-        if (indiceSolver == 0) {
-            solversAEjecutar.add(new SolverApacheMath(modeloActual));
-        } else if (indiceSolver == 1) {
-            solversAEjecutar.add(new SolverHiGHS(modeloActual));
-        } else if (indiceSolver == 2) {
-            solversAEjecutar.add(new SolverGLPK(modeloActual));
-        } else if (indiceSolver == 3) {
+        if (indiceSolver == 0) solversAEjecutar.add(new SolverApacheMath(modeloActual));
+        else if (indiceSolver == 1) solversAEjecutar.add(new SolverHiGHS(modeloActual));
+        else if (indiceSolver == 2) solversAEjecutar.add(new SolverGLPK(modeloActual));
+        else if (indiceSolver == 3) solversAEjecutar.add(new SolverGurobi(modeloActual));
+        else if (indiceSolver == 4) {
             solversAEjecutar.add(new SolverApacheMath(modeloActual));
             solversAEjecutar.add(new SolverHiGHS(modeloActual));
             solversAEjecutar.add(new SolverGLPK(modeloActual));
+            solversAEjecutar.add(new SolverGurobi(modeloActual));
         }
 
         areaResultados.setText("Optimizando modelo matemático... Por favor espere.\n");
         List<ResultadoSolucion> resultadosCorrida = new ArrayList<>();
 
-        // Ejecución secuencial de los solvers inyectados
         for (SolverMILP solver : solversAEjecutar) {
-            ResultadoSolucion res = solver.resolver();
-            resultadosCorrida.add(res);
+            resultadosCorrida.add(solver.resolver());
         }
 
-        // CAPA DE PERSISTENCIA ACTUALIZADA: Guardar inmediatamente en JSON nativo
         ServicioPersistencia.guardarMetricasJSON(ARCHIVO_JSON, resultadosCorrida);
 
-        // Construcción del reporte en pantalla detallando las variables activas exigidas
         StringBuilder sb = new StringBuilder();
         sb.append("==================================================\n");
         sb.append("      REPORTE DE VARIABLES ACTIVAS ACTUALES       \n");
@@ -194,9 +183,8 @@ public class VentanaPrincipal extends JFrame {
             sb.append(String.format("Tiempo Computo   : %d ms%n", r.getTiempoEjecucionMs()));
 
             if (r.isFactible()) {
-                sb.append("Variables de Decisión Activas:\n");
+                sb.append("Variables Activas:\n");
                 for (Map.Entry<String, Double> entry : r.getVariablesActivas().entrySet()) {
-                    // Requisito: Mostrar el impacto de las variables binarias y flujos continuos en pantalla
                     if (entry.getValue() > 0.0001) {
                         sb.append(String.format("  -> %s = %.4f%n", entry.getKey(), entry.getValue()));
                     }
@@ -205,78 +193,86 @@ public class VentanaPrincipal extends JFrame {
             sb.append("--------------------------------------------------\n");
         }
         areaResultados.setText(sb.toString());
-
-        // Actualizar la tabla comparativa inferior cargando los datos históricos del JSON
         actualizarTablaHistorial();
     }
 
-    /**
-     * Analizador (Parser) de JSON nativo de nivel Senior.
-     * Lee de forma secuencial el archivo estructurado sin requerir librerías externas.
-     */
     private void actualizarTablaHistorial() {
         File archivo = new File(ARCHIVO_JSON);
-        if (!archivo.exists()) {
-            lblTotalSoluciones.setText("Cantidad de soluciones almacenadas en el historial: 0 (No se ha generado el JSON)");
-            return;
-        }
+        if (!archivo.exists()) return;
 
-        // Limpiar la tabla visual para evitar duplicidad de filas al recargar
         modeloTabla.setRowCount(0);
         int contadorSoluciones = 0;
 
         try (BufferedReader br = new BufferedReader(new FileReader(archivo))) {
-            String linea;
-            String solver = "";
-            String factible = "";
-            String costo = "";
-            String tiempo = "";
+            String linea, solver = "", factible = "", costo = "", tiempo = "";
 
             while ((linea = br.readLine()) != null) {
                 linea = linea.trim();
-
-                if (linea.contains("\"solver\":")) {
-                    solver = extraerValorClave(linea);
-                } else if (linea.contains("\"factible\":")) {
-                    factible = extraerValorClave(linea);
-                } else if (linea.contains("\"costo_optimo\":")) {
-                    costo = extraerValorClave(linea);
-                } else if (linea.contains("\"tiempo_ms\":")) {
-                    tiempo = extraerValorClave(linea);
-                } else if (linea.startsWith("}") || linea.startsWith("},")) {
-                    // Al cerrar el bloque de un objeto JSON, inyectamos la fila procesada en la JTable
+                if (linea.contains("\"solver\":")) solver = extraerValorClave(linea);
+                else if (linea.contains("\"factible\":")) factible = extraerValorClave(linea);
+                else if (linea.contains("\"costo_optimo\":")) costo = extraerValorClave(linea);
+                else if (linea.contains("\"tiempo_ms\":")) tiempo = extraerValorClave(linea);
+                else if (linea.startsWith("}") || linea.startsWith("},")) {
                     if (!solver.isEmpty()) {
                         modeloTabla.addRow(new Object[]{solver, factible, costo, tiempo});
                         contadorSoluciones++;
-                        // Resetear variables auxiliares
                         solver = ""; factible = ""; costo = ""; tiempo = "";
                     }
                 }
             }
-
-            // Requisito analítico de la rúbrica: "Cantidad de soluciones almacenadas"
-            lblTotalSoluciones.setText("Cantidad de soluciones almacenadas en el historial (Registros JSON): " + contadorSoluciones);
-
-        } catch (Exception e) {
-            System.err.println("Error procesando analítica desde JSON: " + e.getMessage());
-        }
+            lblTotalSoluciones.setText("Soluciones en el historial (JSON): " + contadorSoluciones);
+        } catch (Exception ignored) {}
     }
 
-    /**
-     * Limpia las comillas, comas y espacios de una línea JSON para extraer el valor plano
-     */
     private String extraerValorClave(String linea) {
         String[] partes = linea.split(":");
         if (partes.length >= 2) {
             String valor = partes[1].trim();
-            if (valor.endsWith(",")) {
-                valor = valor.substring(0, valor.length() - 1).trim();
-            }
-            if (valor.startsWith("\"") && valor.endsWith("\"")) {
-                valor = valor.substring(1, valor.length() - 1);
-            }
+            if (valor.endsWith(",")) valor = valor.substring(0, valor.length() - 1).trim();
+            if (valor.startsWith("\"") && valor.endsWith("\"")) valor = valor.substring(1, valor.length() - 1);
             return valor;
         }
         return "";
+    }
+
+    // =========================================================================
+    // ANALÍTICA VISUAL CON JFREECHART (Gráfico de Barras)
+    // =========================================================================
+    private void mostrarGraficoBarras() {
+        if (modeloTabla.getRowCount() == 0) {
+            JOptionPane.showMessageDialog(this, "No hay datos en la tabla para graficar. Ejecuta una optimización primero.", "Sin datos", JOptionPane.WARNING_MESSAGE);
+            return;
+        }
+
+        DefaultCategoryDataset dataset = new DefaultCategoryDataset();
+        int filas = modeloTabla.getRowCount();
+
+        // Toma los últimos 4 registros de la tabla (asumiendo que corriste la opción "Todos en lote")
+        int inicio = Math.max(0, filas - 4);
+
+        for (int i = inicio; i < filas; i++) {
+            String solver = (String) modeloTabla.getValueAt(i, 0);
+            String tiempoStr = (String) modeloTabla.getValueAt(i, 3);
+            try {
+                double tiempo = Double.parseDouble(tiempoStr);
+                // Extrae la primera palabra para que las columnas tengan nombres cortos (Ej: "Apache", "HiGHS")
+                String nombreCorto = solver.split(" ")[0];
+                dataset.addValue(tiempo, "Tiempo (ms)", nombreCorto);
+            } catch (Exception ignored) {}
+        }
+
+        JFreeChart barChart = ChartFactory.createBarChart(
+                "Comparativa de Tiempos de Ejecución",
+                "Motor Matemático",
+                "Tiempo en Milisegundos (ms)",
+                dataset,
+                PlotOrientation.VERTICAL,
+                true, true, false);
+
+        JFrame frameGrafico = new JFrame("Analítica Visual - Resultados");
+        frameGrafico.setSize(700, 450);
+        frameGrafico.setLocationRelativeTo(this);
+        frameGrafico.add(new ChartPanel(barChart));
+        frameGrafico.setVisible(true);
     }
 }

@@ -15,12 +15,25 @@
     </properties>
 
     <dependencies>
-        <!-- Apache Commons Math -->
         <dependency>
             <groupId>org.apache.commons</groupId>
             <artifactId>commons-math3</artifactId>
             <version>3.6.1</version>
         </dependency>
+        
+        <dependency>
+            <groupId>com.gurobi</groupId>
+            <artifactId>gurobi</artifactId>
+            <version>11.0</version>
+            <scope>system</scope>
+            <systemPath>${project.basedir}/lib/gurobi.jar</systemPath>
+        </dependency>
+
+        <dependency>
+            <groupId>org.jfree</groupId>
+            <artifactId>jfreechart</artifactId>
+            <version>1.5.4</version>
+        </dependency>
     </dependencies>
 
-</project> 
+</project>
