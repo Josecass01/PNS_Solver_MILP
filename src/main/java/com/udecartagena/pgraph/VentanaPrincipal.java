@@ -31,6 +31,9 @@ public class VentanaPrincipal extends JFrame {
     private PGraph modeloActual = null;
     private final String ARCHIVO_JSON = "analitica_solvers.json";
 
+    // Lista para guardar los resultados de la última corrida en memoria para los gráficos
+    private List<ResultadoSolucion> ultimaCorrida = new ArrayList<>();
+
     public VentanaPrincipal() {
         setTitle("PNS Solver MILP - Universidad de Cartagena");
         setSize(950, 680);
@@ -108,17 +111,38 @@ public class VentanaPrincipal extends JFrame {
         panelCentral.add(panelComparacion);
         add(panelCentral, BorderLayout.CENTER);
 
-        // PANEL INFERIOR (Con el nuevo botón de gráficos)
+        // PANEL INFERIOR (Con los botones de gráficos y árbol)
         JPanel panelInferior = new JPanel(new BorderLayout());
         panelInferior.setBorder(BorderFactory.createEmptyBorder(5, 10, 10, 10));
 
         lblTotalSoluciones = new JLabel("Cantidad de soluciones almacenadas en el historial: 0");
         panelInferior.add(lblTotalSoluciones, BorderLayout.WEST);
 
+        // Botón de Gráfico de Barras
         JButton btnGrafico = new JButton("Visualizar Gráfico de Tiempos");
         btnGrafico.setFont(new Font("SansSerif", Font.BOLD, 12));
         btnGrafico.addActionListener(e -> mostrarGraficoBarras());
-        panelInferior.add(btnGrafico, BorderLayout.EAST);
+
+        // ---> BOTÓN DEL ÁRBOL DE DECISIONES CON EL NOMBRE DEL SOLVER DINÁMICO <---
+        JButton btnArbol = new JButton("Explorar Árbol de Decisiones (Rutas)");
+        btnArbol.setFont(new Font("SansSerif", Font.BOLD, 12));
+        btnArbol.addActionListener(e -> {
+            if (modeloActual == null) {
+                JOptionPane.showMessageDialog(this, "Carga un modelo .txt primero.");
+            } else {
+                // Captura dinámicamente el nombre del motor seleccionado en el ComboBox
+                String solverSeleccionado = comboSolvers.getSelectedItem().toString();
+                // Lo envía a la clase VisorGrafo
+                VisorGrafo.mostrar(this, modeloActual, solverSeleccionado);
+            }
+        });
+
+        // Sub-panel para agrupar los botones a la derecha
+        JPanel panelBotonesDer = new JPanel(new FlowLayout(FlowLayout.RIGHT));
+        panelBotonesDer.add(btnArbol);
+        panelBotonesDer.add(btnGrafico);
+
+        panelInferior.add(panelBotonesDer, BorderLayout.EAST);
 
         add(panelInferior, BorderLayout.SOUTH);
     }
@@ -168,6 +192,9 @@ public class VentanaPrincipal extends JFrame {
         for (SolverMILP solver : solversAEjecutar) {
             resultadosCorrida.add(solver.resolver());
         }
+
+        // GUARDAR LA ÚLTIMA CORRIDA EN MEMORIA
+        ultimaCorrida = new ArrayList<>(resultadosCorrida);
 
         ServicioPersistencia.guardarMetricasJSON(ARCHIVO_JSON, resultadosCorrida);
 
@@ -236,43 +263,47 @@ public class VentanaPrincipal extends JFrame {
     }
 
     // =========================================================================
-    // ANALÍTICA VISUAL CON JFREECHART (Gráfico de Barras)
+    // ANALÍTICA VISUAL CON JFREECHART (Gráfico de Barras con Pestañas)
     // =========================================================================
     private void mostrarGraficoBarras() {
-        if (modeloTabla.getRowCount() == 0) {
-            JOptionPane.showMessageDialog(this, "No hay datos en la tabla para graficar. Ejecuta una optimización primero.", "Sin datos", JOptionPane.WARNING_MESSAGE);
+        if (ultimaCorrida == null || ultimaCorrida.isEmpty()) {
+            JOptionPane.showMessageDialog(this,
+                    "Ejecuta una optimización primero para generar datos.",
+                    "Sin datos", JOptionPane.WARNING_MESSAGE);
             return;
         }
 
-        DefaultCategoryDataset dataset = new DefaultCategoryDataset();
-        int filas = modeloTabla.getRowCount();
+        DefaultCategoryDataset datasetTiempos = new DefaultCategoryDataset();
+        DefaultCategoryDataset datasetCostos = new DefaultCategoryDataset();
 
-        // Toma los últimos 4 registros de la tabla (asumiendo que corriste la opción "Todos en lote")
-        int inicio = Math.max(0, filas - 4);
+        for (ResultadoSolucion r : ultimaCorrida) {
+            String nombre = r.getNombreSolver().split(" ")[0];
+            datasetTiempos.addValue(r.getTiempoEjecucionMs(), "Tiempo (ms)", nombre);
 
-        for (int i = inicio; i < filas; i++) {
-            String solver = (String) modeloTabla.getValueAt(i, 0);
-            String tiempoStr = (String) modeloTabla.getValueAt(i, 3);
-            try {
-                double tiempo = Double.parseDouble(tiempoStr);
-                // Extrae la primera palabra para que las columnas tengan nombres cortos (Ej: "Apache", "HiGHS")
-                String nombreCorto = solver.split(" ")[0];
-                dataset.addValue(tiempo, "Tiempo (ms)", nombreCorto);
-            } catch (Exception ignored) {}
+            if (r.isFactible()) {
+                datasetCostos.addValue(r.getCostoOptimo(), "Costo Z", nombre);
+            }
         }
 
-        JFreeChart barChart = ChartFactory.createBarChart(
+        JFreeChart chartTiempos = ChartFactory.createBarChart(
                 "Comparativa de Tiempos de Ejecución",
-                "Motor Matemático",
-                "Tiempo en Milisegundos (ms)",
-                dataset,
-                PlotOrientation.VERTICAL,
-                true, true, false);
+                "Motor Matemático", "Tiempo (ms)", datasetTiempos,
+                PlotOrientation.VERTICAL, true, true, false);
 
-        JFrame frameGrafico = new JFrame("Analítica Visual - Resultados");
-        frameGrafico.setSize(700, 450);
-        frameGrafico.setLocationRelativeTo(this);
-        frameGrafico.add(new ChartPanel(barChart));
-        frameGrafico.setVisible(true);
+        JFreeChart chartCostos = ChartFactory.createBarChart(
+                "Comparativa de Valor Objetivo Z",
+                "Motor Matemático", "Costo Óptimo (Z)", datasetCostos,
+                PlotOrientation.VERTICAL, true, true, false);
+
+        JDialog dialog = new JDialog(this, "Analítica Visual - Resultados", true);
+        dialog.setSize(750, 500);
+        dialog.setLocationRelativeTo(this);
+
+        JTabbedPane tabs = new JTabbedPane();
+        tabs.addTab("Tiempos de Ejecución", new ChartPanel(chartTiempos));
+        tabs.addTab("Valor Objetivo (Z)", new ChartPanel(chartCostos));
+
+        dialog.add(tabs);
+        dialog.setVisible(true);
     }
 }
