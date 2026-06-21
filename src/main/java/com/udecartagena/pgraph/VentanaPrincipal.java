@@ -115,7 +115,7 @@ public class VentanaPrincipal extends JFrame {
         JPanel panelInferior = new JPanel(new BorderLayout());
         panelInferior.setBorder(BorderFactory.createEmptyBorder(5, 10, 10, 10));
 
-        // NUEVO: Sub-panel para el contador y el botón de limpiar historial
+        // Sub-panel para el contador y el botón de limpiar historial
         JPanel panelInferiorIzq = new JPanel(new FlowLayout(FlowLayout.LEFT, 0, 0));
         lblTotalSoluciones = new JLabel("Cantidad de soluciones almacenadas en el historial: 0");
         JButton btnLimpiar = new JButton("🗑️ Limpiar Historial");
@@ -134,16 +134,14 @@ public class VentanaPrincipal extends JFrame {
         btnGrafico.setFont(new Font("SansSerif", Font.BOLD, 12));
         btnGrafico.addActionListener(e -> mostrarGraficoBarras());
 
-        // ---> BOTÓN DEL ÁRBOL DE DECISIONES CON EL NOMBRE DEL SOLVER DINÁMICO <---
+        // Botón del Árbol de Decisiones (Dinámico)
         JButton btnArbol = new JButton("Explorar Árbol de Decisiones (Rutas)");
         btnArbol.setFont(new Font("SansSerif", Font.BOLD, 12));
         btnArbol.addActionListener(e -> {
             if (modeloActual == null) {
                 JOptionPane.showMessageDialog(this, "Carga un modelo .txt primero.");
             } else {
-                // Captura dinámicamente el nombre del motor seleccionado en el ComboBox
                 String solverSeleccionado = comboSolvers.getSelectedItem().toString();
-                // Lo envía a la clase VisorGrafo
                 VisorGrafo.mostrar(this, modeloActual, solverSeleccionado);
             }
         });
@@ -199,37 +197,65 @@ public class VentanaPrincipal extends JFrame {
 
         areaResultados.setText("Optimizando modelo matemático... Por favor espere.\n");
         List<ResultadoSolucion> resultadosCorrida = new ArrayList<>();
+        StringBuilder sbErrores = new StringBuilder(); // Para capturar si algún solver falla
 
+        // === ARQUITECTURA TOLERANTE A FALLOS (FAULT TOLERANCE) ===
         for (SolverMILP solver : solversAEjecutar) {
-            resultadosCorrida.add(solver.resolver());
+            try {
+                // Intenta ejecutar el solver
+                resultadosCorrida.add(solver.resolver());
+            } catch (Throwable ex) {
+                // Atrapamos Throwable para interceptar problemas de licencias vencidas, DLLs faltantes o ejecutables rotos.
+                // Esto asegura que el programa NUNCA se congele y siga con el próximo solver disponible.
+                String nombreSolver = solver.getClass().getSimpleName().replace("Solver", "");
+                sbErrores.append(" -> ").append(nombreSolver).append(" falló: ").append(ex.getMessage()).append("\n");
+            }
         }
 
-        // GUARDAR LA ÚLTIMA CORRIDA EN MEMORIA
+        // GUARDAR LA ÚLTIMA CORRIDA EN MEMORIA PARA LAS GRÁFICAS
         ultimaCorrida = new ArrayList<>(resultadosCorrida);
 
-        ServicioPersistencia.guardarMetricasJSON(ARCHIVO_JSON, resultadosCorrida);
+        if (!resultadosCorrida.isEmpty()) {
+            ServicioPersistencia.guardarMetricasJSON(ARCHIVO_JSON, resultadosCorrida);
+        }
 
         StringBuilder sb = new StringBuilder();
+
+        // Si hubo errores (ej: falta licencia de Gurobi), informamos en el área de texto sin crashear
+        if (sbErrores.length() > 0) {
+            sb.append("==================================================\n");
+            sb.append("   ⚠️ SOLVERS OMITIDOS (ERROR DE LICENCIA / DLL)  \n");
+            sb.append("==================================================\n");
+            sb.append(sbErrores.toString());
+            sb.append("--------------------------------------------------\n\n");
+        }
+
         sb.append("==================================================\n");
         sb.append("      REPORTE DE VARIABLES ACTIVAS ACTUALES       \n");
         sb.append("==================================================\n");
 
-        for (ResultadoSolucion r : resultadosCorrida) {
-            sb.append(String.format("Solver Ejecutado : %s%n", r.getNombreSolver()));
-            sb.append(String.format("Estatus Solución : %s%n", r.isFactible() ? "FACTIBLE / ÓPTIMA" : "INFACTIBLE"));
-            sb.append(String.format("Valor Objetivo Z : %.4f%n", r.getCostoOptimo()));
-            sb.append(String.format("Tiempo Computo   : %d ms%n", r.getTiempoEjecucionMs()));
+        if (resultadosCorrida.isEmpty()) {
+            sb.append("Ningún motor matemático pudo completarse con éxito.\n");
+            sb.append("Verifique los requerimientos técnicos de los solvers.\n");
+        } else {
+            for (ResultadoSolucion r : resultadosCorrida) {
+                sb.append(String.format("Solver Ejecutado : %s%n", r.getNombreSolver()));
+                sb.append(String.format("Estatus Solución : %s%n", r.isFactible() ? "FACTIBLE / ÓPTIMA" : "INFACTIBLE"));
+                sb.append(String.format("Valor Objetivo Z : %.4f%n", r.getCostoOptimo()));
+                sb.append(String.format("Tiempo Computo   : %d ms%n", r.getTiempoEjecucionMs()));
 
-            if (r.isFactible()) {
-                sb.append("Variables Activas:\n");
-                for (Map.Entry<String, Double> entry : r.getVariablesActivas().entrySet()) {
-                    if (entry.getValue() > 0.0001) {
-                        sb.append(String.format("  -> %s = %.4f%n", entry.getKey(), entry.getValue()));
+                if (r.isFactible()) {
+                    sb.append("Variables Activas:\n");
+                    for (Map.Entry<String, Double> entry : r.getVariablesActivas().entrySet()) {
+                        if (entry.getValue() > 0.0001) {
+                            sb.append(String.format("  -> %s = %.4f%n", entry.getKey(), entry.getValue()));
+                        }
                     }
                 }
+                sb.append("--------------------------------------------------\n");
             }
-            sb.append("--------------------------------------------------\n");
         }
+
         areaResultados.setText(sb.toString());
         actualizarTablaHistorial();
     }
@@ -306,8 +332,9 @@ public class VentanaPrincipal extends JFrame {
     private void mostrarGraficoBarras() {
         if (ultimaCorrida == null || ultimaCorrida.isEmpty()) {
             JOptionPane.showMessageDialog(this,
-                    "Ejecuta una optimización primero para generar datos.",
-                    "Sin datos", JOptionPane.WARNING_MESSAGE);
+                    "Ejecuta una optimización exitosa primero para generar datos.\n" +
+                            "(Si hubo errores de licencia, resuelve el problema o elige otro motor).",
+                    "Sin datos para graficar", JOptionPane.WARNING_MESSAGE);
             return;
         }
 
@@ -333,8 +360,12 @@ public class VentanaPrincipal extends JFrame {
                 "Motor Matemático", "Costo Óptimo (Z)", datasetCostos,
                 PlotOrientation.VERTICAL, true, true, false);
 
+        // --- APLICAR ESTILO MODERNO Y PROFESIONAL ---
+        aplicarEstiloGrafico(chartTiempos, new Color(41, 128, 185)); // Azul elegante para tiempos
+        aplicarEstiloGrafico(chartCostos, new Color(39, 174, 96));   // Verde esmeralda para costos
+
         JDialog dialog = new JDialog(this, "Analítica Visual - Resultados", true);
-        dialog.setSize(750, 500);
+        dialog.setSize(850, 550);
         dialog.setLocationRelativeTo(this);
 
         JTabbedPane tabs = new JTabbedPane();
@@ -343,5 +374,35 @@ public class VentanaPrincipal extends JFrame {
 
         dialog.add(tabs);
         dialog.setVisible(true);
+    }
+
+    // --- NUEVO MÉTODO: Formateo estético del gráfico ---
+    private void aplicarEstiloGrafico(JFreeChart chart, Color colorPrincipal) {
+        // Fondo blanco general
+        chart.setBackgroundPaint(Color.WHITE);
+        chart.getTitle().setFont(new Font("SansSerif", Font.BOLD, 18));
+
+        org.jfree.chart.plot.CategoryPlot plot = chart.getCategoryPlot();
+        plot.setBackgroundPaint(Color.WHITE); // Fondo blanco interior
+        plot.setDomainGridlinePaint(new Color(230, 230, 230)); // Rejilla suave
+        plot.setRangeGridlinePaint(new Color(230, 230, 230));
+        plot.setOutlineVisible(false); // Quitar borde perimetral feo
+
+        org.jfree.chart.renderer.category.BarRenderer renderer = (org.jfree.chart.renderer.category.BarRenderer) plot.getRenderer();
+
+        // ¡LA MAGIA AQUÍ!: Quitar el gradiente 3D anticuado y hacerlo Flat Design
+        renderer.setBarPainter(new org.jfree.chart.renderer.category.StandardBarPainter());
+
+        // Asignar el color sólido profesional
+        renderer.setSeriesPaint(0, colorPrincipal);
+
+        // Ajustar el ancho de las barras
+        renderer.setItemMargin(0.1);
+
+        // Fuentes modernas para los ejes
+        plot.getDomainAxis().setLabelFont(new Font("SansSerif", Font.BOLD, 14));
+        plot.getDomainAxis().setTickLabelFont(new Font("SansSerif", Font.PLAIN, 12));
+        plot.getRangeAxis().setLabelFont(new Font("SansSerif", Font.BOLD, 14));
+        plot.getRangeAxis().setTickLabelFont(new Font("SansSerif", Font.PLAIN, 12));
     }
 }
