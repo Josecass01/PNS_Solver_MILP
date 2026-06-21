@@ -115,8 +115,19 @@ public class VentanaPrincipal extends JFrame {
         JPanel panelInferior = new JPanel(new BorderLayout());
         panelInferior.setBorder(BorderFactory.createEmptyBorder(5, 10, 10, 10));
 
+        // NUEVO: Sub-panel para el contador y el botón de limpiar historial
+        JPanel panelInferiorIzq = new JPanel(new FlowLayout(FlowLayout.LEFT, 0, 0));
         lblTotalSoluciones = new JLabel("Cantidad de soluciones almacenadas en el historial: 0");
-        panelInferior.add(lblTotalSoluciones, BorderLayout.WEST);
+        JButton btnLimpiar = new JButton("🗑️ Limpiar Historial");
+        btnLimpiar.setFont(new Font("SansSerif", Font.PLAIN, 12));
+        btnLimpiar.setMargin(new Insets(2, 5, 2, 5));
+        btnLimpiar.addActionListener(e -> limpiarHistorial());
+
+        panelInferiorIzq.add(lblTotalSoluciones);
+        panelInferiorIzq.add(Box.createHorizontalStrut(15)); // Espacio separador
+        panelInferiorIzq.add(btnLimpiar);
+
+        panelInferior.add(panelInferiorIzq, BorderLayout.WEST);
 
         // Botón de Gráfico de Barras
         JButton btnGrafico = new JButton("Visualizar Gráfico de Tiempos");
@@ -241,14 +252,41 @@ public class VentanaPrincipal extends JFrame {
                 else if (linea.contains("\"tiempo_ms\":")) tiempo = extraerValorClave(linea);
                 else if (linea.startsWith("}") || linea.startsWith("},")) {
                     if (!solver.isEmpty()) {
-                        modeloTabla.addRow(new Object[]{solver, factible, costo, tiempo});
+                        // Formateo visual para que la tabla luzca profesional
+                        String factibleFormat = factible.equalsIgnoreCase("true") ? "Sí" : "No";
+                        String costoFormat = factible.equalsIgnoreCase("true") ? costo : "N/A (Infactible)";
+
+                        modeloTabla.addRow(new Object[]{solver, factibleFormat, costoFormat, tiempo});
                         contadorSoluciones++;
                         solver = ""; factible = ""; costo = ""; tiempo = "";
                     }
                 }
             }
-            lblTotalSoluciones.setText("Soluciones en el historial (JSON): " + contadorSoluciones);
+            lblTotalSoluciones.setText("Cantidad de soluciones almacenadas en el historial: " + contadorSoluciones);
         } catch (Exception ignored) {}
+
+        // Centrar el texto en las columnas para mejor estética
+        javax.swing.table.DefaultTableCellRenderer centerRenderer = new javax.swing.table.DefaultTableCellRenderer();
+        centerRenderer.setHorizontalAlignment(JLabel.CENTER);
+        for(int i = 1; i < 4; i++) {
+            tablaAnalitica.getColumnModel().getColumn(i).setCellRenderer(centerRenderer);
+        }
+    }
+
+    private void limpiarHistorial() {
+        int confirm = JOptionPane.showConfirmDialog(this,
+                "¿Estás seguro de que deseas borrar todo el historial de soluciones?",
+                "Limpiar Historial", JOptionPane.YES_NO_OPTION, JOptionPane.WARNING_MESSAGE);
+        if (confirm == JOptionPane.YES_OPTION) {
+            File archivo = new File(ARCHIVO_JSON);
+            if (archivo.exists()) {
+                archivo.delete();
+            }
+            modeloTabla.setRowCount(0);
+            lblTotalSoluciones.setText("Cantidad de soluciones almacenadas en el historial: 0");
+            ultimaCorrida.clear();
+            JOptionPane.showMessageDialog(this, "Historial limpiado correctamente.");
+        }
     }
 
     private String extraerValorClave(String linea) {
