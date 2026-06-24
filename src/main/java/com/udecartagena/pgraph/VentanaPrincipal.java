@@ -28,6 +28,10 @@ public class VentanaPrincipal extends JFrame {
     private DefaultTableModel modeloTabla;
     private JLabel lblTotalSoluciones;
 
+    // Componentes para la Tabla de Resumen que exige la rúbrica
+    private JTable tablaResumen;
+    private DefaultTableModel modeloTablaResumen;
+
     private PGraph modeloActual = null;
     private final String ARCHIVO_JSON = "analitica_solvers.json";
 
@@ -100,13 +104,35 @@ public class VentanaPrincipal extends JFrame {
         panelResultadosActuales.add(new JScrollPane(areaResultados), BorderLayout.CENTER);
         panelCentral.add(panelResultadosActuales);
 
-        JPanel panelComparacion = new JPanel(new BorderLayout());
+        JPanel panelComparacion = new JPanel(new BorderLayout(0, 5));
         panelComparacion.setBorder(BorderFactory.createTitledBorder("Analítica Comparativa Histórica (Respaldo JSON Estructurado)"));
 
         String[] columnas = {"Solver Utilizado", "Factible", "Costo Óptimo (Z)", "Tiempo (ms)"};
         modeloTabla = new DefaultTableModel(columnas, 0);
         tablaAnalitica = new JTable(modeloTabla);
         panelComparacion.add(new JScrollPane(tablaAnalitica), BorderLayout.CENTER);
+
+        // --- SOLUCIÓN: Títulos EXACTOS de la rúbrica del profesor JC ---
+        String[] columnasResumen = {
+                "Núm. Soluciones Encontradas",
+                "Estado de la Solución",
+                "Diferencias entre Resultados",
+                "Mejor Tiempo (Ejecución)",
+                "Diferencia de Tiempo"
+        };
+        modeloTablaResumen = new DefaultTableModel(columnasResumen, 0);
+        tablaResumen = new JTable(modeloTablaResumen);
+
+        javax.swing.table.DefaultTableCellRenderer centerRenderer = new javax.swing.table.DefaultTableCellRenderer();
+        centerRenderer.setHorizontalAlignment(JLabel.CENTER);
+        for(int i = 0; i < tablaResumen.getColumnCount(); i++) {
+            tablaResumen.getColumnModel().getColumn(i).setCellRenderer(centerRenderer);
+        }
+
+        JScrollPane scrollResumen = new JScrollPane(tablaResumen);
+        scrollResumen.setPreferredSize(new Dimension(0, 75));
+        scrollResumen.setBorder(BorderFactory.createTitledBorder("Resumen Comparativo (Última Ejecución)"));
+        panelComparacion.add(scrollResumen, BorderLayout.SOUTH);
 
         panelCentral.add(panelComparacion);
         add(panelCentral, BorderLayout.CENTER);
@@ -115,7 +141,6 @@ public class VentanaPrincipal extends JFrame {
         JPanel panelInferior = new JPanel(new BorderLayout());
         panelInferior.setBorder(BorderFactory.createEmptyBorder(5, 10, 10, 10));
 
-        // Sub-panel para el contador y el botón de limpiar historial
         JPanel panelInferiorIzq = new JPanel(new FlowLayout(FlowLayout.LEFT, 0, 0));
         lblTotalSoluciones = new JLabel("Cantidad de soluciones almacenadas en el historial: 0");
         JButton btnLimpiar = new JButton("🗑️ Limpiar Historial");
@@ -124,17 +149,15 @@ public class VentanaPrincipal extends JFrame {
         btnLimpiar.addActionListener(e -> limpiarHistorial());
 
         panelInferiorIzq.add(lblTotalSoluciones);
-        panelInferiorIzq.add(Box.createHorizontalStrut(15)); // Espacio separador
+        panelInferiorIzq.add(Box.createHorizontalStrut(15));
         panelInferiorIzq.add(btnLimpiar);
 
         panelInferior.add(panelInferiorIzq, BorderLayout.WEST);
 
-        // Botón de Gráfico de Barras
         JButton btnGrafico = new JButton("Visualizar Gráfico de Tiempos");
         btnGrafico.setFont(new Font("SansSerif", Font.BOLD, 12));
         btnGrafico.addActionListener(e -> mostrarGraficoBarras());
 
-        // Botón del Árbol de Decisiones (Dinámico)
         JButton btnArbol = new JButton("Explorar Árbol de Decisiones (Rutas)");
         btnArbol.setFont(new Font("SansSerif", Font.BOLD, 12));
         btnArbol.addActionListener(e -> {
@@ -146,7 +169,6 @@ public class VentanaPrincipal extends JFrame {
             }
         });
 
-        // Sub-panel para agrupar los botones a la derecha
         JPanel panelBotonesDer = new JPanel(new FlowLayout(FlowLayout.RIGHT));
         panelBotonesDer.add(btnArbol);
         panelBotonesDer.add(btnGrafico);
@@ -197,22 +219,17 @@ public class VentanaPrincipal extends JFrame {
 
         areaResultados.setText("Optimizando modelo matemático... Por favor espere.\n");
         List<ResultadoSolucion> resultadosCorrida = new ArrayList<>();
-        StringBuilder sbErrores = new StringBuilder(); // Para capturar si algún solver falla
+        StringBuilder sbErrores = new StringBuilder();
 
-        // === ARQUITECTURA TOLERANTE A FALLOS (FAULT TOLERANCE) ===
         for (SolverMILP solver : solversAEjecutar) {
             try {
-                // Intenta ejecutar el solver
                 resultadosCorrida.add(solver.resolver());
             } catch (Throwable ex) {
-                // Atrapamos Throwable para interceptar problemas de licencias vencidas, DLLs faltantes o ejecutables rotos.
-                // Esto asegura que el programa NUNCA se congele y siga con el próximo solver disponible.
                 String nombreSolver = solver.getClass().getSimpleName().replace("Solver", "");
                 sbErrores.append(" -> ").append(nombreSolver).append(" falló: ").append(ex.getMessage()).append("\n");
             }
         }
 
-        // GUARDAR LA ÚLTIMA CORRIDA EN MEMORIA PARA LAS GRÁFICAS
         ultimaCorrida = new ArrayList<>(resultadosCorrida);
 
         if (!resultadosCorrida.isEmpty()) {
@@ -221,7 +238,6 @@ public class VentanaPrincipal extends JFrame {
 
         StringBuilder sb = new StringBuilder();
 
-        // Si hubo errores (ej: falta licencia de Gurobi), informamos en el área de texto sin crashear
         if (sbErrores.length() > 0) {
             sb.append("==================================================\n");
             sb.append("   ⚠️ SOLVERS OMITIDOS (ERROR DE LICENCIA / DLL)  \n");
@@ -254,6 +270,32 @@ public class VentanaPrincipal extends JFrame {
                 }
                 sb.append("--------------------------------------------------\n");
             }
+
+            // --- LLENADO EXACTO A LOS PARÁMETROS DE LA RÚBRICA ---
+            int factibles = 0;
+            long minT = Long.MAX_VALUE, maxT = -1;
+            String fastS = "";
+            double firstZ = -1;
+            boolean sameZ = true;
+
+            for (ResultadoSolucion r : resultadosCorrida) {
+                if (r.isFactible()) factibles++;
+                if (r.getTiempoEjecucionMs() < minT) { minT = r.getTiempoEjecucionMs(); fastS = r.getNombreSolver(); }
+                if (r.getTiempoEjecucionMs() > maxT) { maxT = r.getTiempoEjecucionMs(); }
+                if (r.isFactible()) {
+                    if (firstZ == -1) firstZ = r.getCostoOptimo();
+                    else if (Math.abs(firstZ - r.getCostoOptimo()) > 0.0001) sameZ = false;
+                }
+            }
+
+            String numSoluciones = factibles + " (de " + resultadosCorrida.size() + " ejecutados)";
+            String estadoSolucion = factibles > 0 ? "Óptima / Factible" : "Infactible";
+            String diferenciasRes = (sameZ && factibles > 0) ? "0 diferencias (Todos Z = " + String.format("%.4f", firstZ) + ")" : "Diferencias detectadas en Z";
+            String mejorTiempo = fastS + " (" + minT + " ms)";
+            String difTiempo = (maxT - minT) + " ms";
+
+            modeloTablaResumen.setRowCount(0);
+            modeloTablaResumen.addRow(new Object[]{numSoluciones, estadoSolucion, diferenciasRes, mejorTiempo, difTiempo});
         }
 
         areaResultados.setText(sb.toString());
@@ -278,7 +320,6 @@ public class VentanaPrincipal extends JFrame {
                 else if (linea.contains("\"tiempo_ms\":")) tiempo = extraerValorClave(linea);
                 else if (linea.startsWith("}") || linea.startsWith("},")) {
                     if (!solver.isEmpty()) {
-                        // Formateo visual para que la tabla luzca profesional
                         String factibleFormat = factible.equalsIgnoreCase("true") ? "Sí" : "No";
                         String costoFormat = factible.equalsIgnoreCase("true") ? costo : "N/A (Infactible)";
 
@@ -291,7 +332,6 @@ public class VentanaPrincipal extends JFrame {
             lblTotalSoluciones.setText("Cantidad de soluciones almacenadas en el historial: " + contadorSoluciones);
         } catch (Exception ignored) {}
 
-        // Centrar el texto en las columnas para mejor estética
         javax.swing.table.DefaultTableCellRenderer centerRenderer = new javax.swing.table.DefaultTableCellRenderer();
         centerRenderer.setHorizontalAlignment(JLabel.CENTER);
         for(int i = 1; i < 4; i++) {
@@ -309,8 +349,10 @@ public class VentanaPrincipal extends JFrame {
                 archivo.delete();
             }
             modeloTabla.setRowCount(0);
+            modeloTablaResumen.setRowCount(0);
             lblTotalSoluciones.setText("Cantidad de soluciones almacenadas en el historial: 0");
             ultimaCorrida.clear();
+
             JOptionPane.showMessageDialog(this, "Historial limpiado correctamente.");
         }
     }
@@ -360,9 +402,8 @@ public class VentanaPrincipal extends JFrame {
                 "Motor Matemático", "Costo Óptimo (Z)", datasetCostos,
                 PlotOrientation.VERTICAL, true, true, false);
 
-        // --- APLICAR ESTILO MODERNO Y PROFESIONAL ---
-        aplicarEstiloGrafico(chartTiempos, new Color(41, 128, 185)); // Azul elegante para tiempos
-        aplicarEstiloGrafico(chartCostos, new Color(39, 174, 96));   // Verde esmeralda para costos
+        aplicarEstiloGrafico(chartTiempos, new Color(41, 128, 185));
+        aplicarEstiloGrafico(chartCostos, new Color(39, 174, 96));
 
         JDialog dialog = new JDialog(this, "Analítica Visual - Resultados", true);
         dialog.setSize(850, 550);
@@ -372,34 +413,79 @@ public class VentanaPrincipal extends JFrame {
         tabs.addTab("Tiempos de Ejecución", new ChartPanel(chartTiempos));
         tabs.addTab("Valor Objetivo (Z)", new ChartPanel(chartCostos));
 
+        tabs.addTab("Resumen Estadístico", crearPanelResumen(ultimaCorrida));
+
         dialog.add(tabs);
         dialog.setVisible(true);
     }
 
-    // --- NUEVO MÉTODO: Formateo estético del gráfico ---
+    private JPanel crearPanelResumen(List<ResultadoSolucion> resultados) {
+        JPanel panel = new JPanel(new BorderLayout());
+        panel.setBackground(Color.WHITE);
+        panel.setBorder(BorderFactory.createEmptyBorder(20, 30, 20, 30));
+
+        int total = resultados.size();
+        int factibles = 0;
+        long minTiempo = Long.MAX_VALUE;
+        long maxTiempo = -1;
+        String solverRapido = "";
+        double primerZ = -1;
+        boolean coincidenZ = true;
+
+        for (ResultadoSolucion r : resultados) {
+            if (r.isFactible()) factibles++;
+            if (r.getTiempoEjecucionMs() < minTiempo) {
+                minTiempo = r.getTiempoEjecucionMs();
+                solverRapido = r.getNombreSolver();
+            }
+            if (r.getTiempoEjecucionMs() > maxTiempo) {
+                maxTiempo = r.getTiempoEjecucionMs();
+            }
+            if (r.isFactible()) {
+                if (primerZ == -1) {
+                    primerZ = r.getCostoOptimo();
+                } else if (Math.abs(primerZ - r.getCostoOptimo()) > 0.0001) {
+                    coincidenZ = false;
+                }
+            }
+        }
+
+        StringBuilder sb = new StringBuilder();
+        sb.append("<html><body style='font-family: sans-serif; font-size: 15px; color: #333;'>");
+        sb.append("<h2 style='color: #2980b9;'>📊 Análisis Comparativo de Solvers</h2>");
+        sb.append("<ul style='line-height: 2.0;'>");
+        // Adaptado explícitamente a la rúbrica
+        sb.append("<li><b>Número de soluciones encontradas:</b> ").append(factibles).append(" de ").append(total).append(" solvers ejecutados.</li>");
+        if (factibles > 0) {
+            sb.append("<li><b>Estado de la solución:</b> ").append(factibles == total ? "✅ Todas las soluciones son factibles y óptimas." : "⚠️ Algunas soluciones fueron infactibles.").append("</li>");
+            sb.append("<li><b>Diferencias entre resultados:</b> ").append(coincidenZ ? "✅ 0 diferencias. Coincidencia del 100% (Todos Z = " + String.format("%.4f", primerZ) + ")." : "❌ Se encontraron diferencias en los valores óptimos (Z).").append("</li>");
+        }
+        sb.append("<li><b>Tiempo de ejecución (Más rápido):</b> ").append(solverRapido).append(" con un tiempo de <b>").append(minTiempo).append(" ms</b>.</li>");
+        sb.append("<li><b>Diferencia de tiempo (Máx - Mín):</b> ").append(maxTiempo - minTiempo).append(" ms.</li>");
+        sb.append("</ul></body></html>");
+
+        JLabel lblResumen = new JLabel(sb.toString());
+        lblResumen.setVerticalAlignment(SwingConstants.TOP);
+        panel.add(lblResumen, BorderLayout.CENTER);
+
+        return panel;
+    }
+
     private void aplicarEstiloGrafico(JFreeChart chart, Color colorPrincipal) {
-        // Fondo blanco general
         chart.setBackgroundPaint(Color.WHITE);
         chart.getTitle().setFont(new Font("SansSerif", Font.BOLD, 18));
 
         org.jfree.chart.plot.CategoryPlot plot = chart.getCategoryPlot();
-        plot.setBackgroundPaint(Color.WHITE); // Fondo blanco interior
-        plot.setDomainGridlinePaint(new Color(230, 230, 230)); // Rejilla suave
+        plot.setBackgroundPaint(Color.WHITE);
+        plot.setDomainGridlinePaint(new Color(230, 230, 230));
         plot.setRangeGridlinePaint(new Color(230, 230, 230));
-        plot.setOutlineVisible(false); // Quitar borde perimetral feo
+        plot.setOutlineVisible(false);
 
         org.jfree.chart.renderer.category.BarRenderer renderer = (org.jfree.chart.renderer.category.BarRenderer) plot.getRenderer();
-
-        // ¡LA MAGIA AQUÍ!: Quitar el gradiente 3D anticuado y hacerlo Flat Design
         renderer.setBarPainter(new org.jfree.chart.renderer.category.StandardBarPainter());
-
-        // Asignar el color sólido profesional
         renderer.setSeriesPaint(0, colorPrincipal);
-
-        // Ajustar el ancho de las barras
         renderer.setItemMargin(0.1);
 
-        // Fuentes modernas para los ejes
         plot.getDomainAxis().setLabelFont(new Font("SansSerif", Font.BOLD, 14));
         plot.getDomainAxis().setTickLabelFont(new Font("SansSerif", Font.PLAIN, 12));
         plot.getRangeAxis().setLabelFont(new Font("SansSerif", Font.BOLD, 14));

@@ -1591,3 +1591,416 @@ Solving report
                     2 (separation)
                     0 (heuristics)
 Writing the solution to C:\Users\jcgca\AppData\Local\Temp\pns_9903560756851759543.sol
+Running HiGHS 1.14.0 (git hash: 7df0786): Copyright (c) 2026 under Apache 2.0 license terms
+Using BLAS: OpenBLAS 
+Command line parsed using CLI11 2.5.0: Copyright (c) 2017-2025 University of Cincinnati
+Set option solution_file to "C:\Users\jcgca\AppData\Local\Temp\pns_7312076567273578070.sol"
+MIP pns_15682696026551357170 has 9 rows; 12 cols; 21 nonzeros; 6 integer variables (6 binary)
+Coefficient ranges:
+  Matrix  [1e+00, 1e+03]
+  Cost    [1e+00, 4e+00]
+  Bound   [1e+00, 1e+00]
+  RHS     [1e+01, 1e+01]
+Presolving model
+9 rows, 12 cols, 21 nonzeros 0s
+8 rows, 11 cols, 19 nonzeros 0s
+Presolve reductions: rows 8(-1); columns 11(-1); nonzeros 19(-2) 
+
+Solving MIP model with:
+   8 rows
+   11 cols (6 binary, 0 integer, 0 implied int., 5 continuous, 0 domain fixed)
+   19 nonzeros
+
+Src: B => Branching; C => Central rounding; F => Feasibility pump; H => Heuristic;
+     I => Shifting; J => Feasibility jump; L => Sub-MIP; P => Empty MIP; R => Randomized rounding;
+     S => Solve LP; T => Evaluate node; U => Unbounded; X => User solution; Y => HiGHS solution;
+     Z => ZI Round; l => Trivial lower; p => Trivial point; u => Trivial upper; z => Trivial zero
+
+        Nodes      |    B&B Tree     |            Objective Bounds              |  Dynamic Constraints |       Work      
+Src  Proc. InQueue |  Leaves   Expl. | BestBound       BestSol              Gap |   Cuts   InLp Confl. | LpIters     Time
+
+ J       0       0         0   0.00%   -inf            67                 Large        0      0      0         0     0.0s
+ S       0       0         0   0.00%   0               24               100.00%        0      0      0         0     0.0s
+
+16.7% inactive integer columns, restarting
+Model after restart has 6 rows, 8 cols (4 bin., 0 int., 0 impl., 4 cont., 0 dom.fix.), and 14 nonzeros
+
+         0       0         0   0.00%   20.04           24                16.50%        0      0      0         2     0.0s
+         0       0         0   0.00%   20.59701493     24                14.18%        0      0      0         2     0.0s
+         1       0         1 100.00%   24              24                 0.00%        0      0      0         4     0.0s
+
+Solving report
+  Model             pns_15682696026551357170
+  Status            Optimal
+  Primal bound      24
+  Dual bound        24
+  Gap               0% (tolerance: 0.01%)
+  P-D integral      0.00107912367892
+  Solution status   feasible
+                    24 (objective)
+                    0 (bound viol.)
+                    0 (int. viol.)
+                    0 (row viol.)
+  Timing            0.02
+  Max sub-MIP depth 0
+  Nodes             1
+  Repair LPs        0
+  LP iterations     4
+                    0 (strong br.)
+                    2 (separation)
+                    0 (heuristics)
+Writing the solution to C:\Users\jcgca\AppData\Local\Temp\pns_7312076567273578070.sol
+Running HiGHS 1.14.0 (git hash: 7df0786): Copyright (c) 2026 under Apache 2.0 license terms
+Using BLAS: OpenBLAS 
+Command line parsed using CLI11 2.5.0: Copyright (c) 2017-2025 University of Cincinnati
+Set option solution_file to "C:\Users\jcgca\AppData\Local\Temp\pns_2754367050486520712.sol"
+MIP pns_14999311416972779378 has 9 rows; 12 cols; 21 nonzeros; 6 integer variables (6 binary)
+Coefficient ranges:
+  Matrix  [1e+00, 1e+03]
+  Cost    [1e+00, 4e+00]
+  Bound   [1e+00, 1e+00]
+  RHS     [1e+01, 1e+01]
+Presolving model
+9 rows, 12 cols, 21 nonzeros 0s
+8 rows, 11 cols, 19 nonzeros 0s
+Presolve reductions: rows 8(-1); columns 11(-1); nonzeros 19(-2) 
+
+Solving MIP model with:
+   8 rows
+   11 cols (6 binary, 0 integer, 0 implied int., 5 continuous, 0 domain fixed)
+   19 nonzeros
+
+Src: B => Branching; C => Central rounding; F => Feasibility pump; H => Heuristic;
+     I => Shifting; J => Feasibility jump; L => Sub-MIP; P => Empty MIP; R => Randomized rounding;
+     S => Solve LP; T => Evaluate node; U => Unbounded; X => User solution; Y => HiGHS solution;
+     Z => ZI Round; l => Trivial lower; p => Trivial point; u => Trivial upper; z => Trivial zero
+
+        Nodes      |    B&B Tree     |            Objective Bounds              |  Dynamic Constraints |       Work      
+Src  Proc. InQueue |  Leaves   Expl. | BestBound       BestSol              Gap |   Cuts   InLp Confl. | LpIters     Time
+
+ J       0       0         0   0.00%   -inf            67                 Large        0      0      0         0     0.0s
+ S       0       0         0   0.00%   0               24               100.00%        0      0      0         0     0.0s
+
+16.7% inactive integer columns, restarting
+Model after restart has 6 rows, 8 cols (4 bin., 0 int., 0 impl., 4 cont., 0 dom.fix.), and 14 nonzeros
+
+         0       0         0   0.00%   20.04           24                16.50%        0      0      0         2     0.0s
+         0       0         0   0.00%   20.59701493     24                14.18%        0      0      0         2     0.0s
+         1       0         1 100.00%   24              24                 0.00%        0      0      0         4     0.0s
+
+Solving report
+  Model             pns_14999311416972779378
+  Status            Optimal
+  Primal bound      24
+  Dual bound        24
+  Gap               0% (tolerance: 0.01%)
+  P-D integral      0.00110165824617
+  Solution status   feasible
+                    24 (objective)
+                    0 (bound viol.)
+                    0 (int. viol.)
+                    0 (row viol.)
+  Timing            0.02
+  Max sub-MIP depth 0
+  Nodes             1
+  Repair LPs        0
+  LP iterations     4
+                    0 (strong br.)
+                    2 (separation)
+                    0 (heuristics)
+Writing the solution to C:\Users\jcgca\AppData\Local\Temp\pns_2754367050486520712.sol
+Running HiGHS 1.14.0 (git hash: 7df0786): Copyright (c) 2026 under Apache 2.0 license terms
+Using BLAS: OpenBLAS 
+Command line parsed using CLI11 2.5.0: Copyright (c) 2017-2025 University of Cincinnati
+Set option solution_file to "C:\Users\jcgca\AppData\Local\Temp\pns_302281004230613684.sol"
+MIP pns_6878304734723728487 has 9 rows; 12 cols; 21 nonzeros; 6 integer variables (6 binary)
+Coefficient ranges:
+  Matrix  [1e+00, 1e+03]
+  Cost    [1e+00, 4e+00]
+  Bound   [1e+00, 1e+00]
+  RHS     [1e+01, 1e+01]
+Presolving model
+9 rows, 12 cols, 21 nonzeros 0s
+8 rows, 11 cols, 19 nonzeros 0s
+Presolve reductions: rows 8(-1); columns 11(-1); nonzeros 19(-2) 
+
+Solving MIP model with:
+   8 rows
+   11 cols (6 binary, 0 integer, 0 implied int., 5 continuous, 0 domain fixed)
+   19 nonzeros
+
+Src: B => Branching; C => Central rounding; F => Feasibility pump; H => Heuristic;
+     I => Shifting; J => Feasibility jump; L => Sub-MIP; P => Empty MIP; R => Randomized rounding;
+     S => Solve LP; T => Evaluate node; U => Unbounded; X => User solution; Y => HiGHS solution;
+     Z => ZI Round; l => Trivial lower; p => Trivial point; u => Trivial upper; z => Trivial zero
+
+        Nodes      |    B&B Tree     |            Objective Bounds              |  Dynamic Constraints |       Work      
+Src  Proc. InQueue |  Leaves   Expl. | BestBound       BestSol              Gap |   Cuts   InLp Confl. | LpIters     Time
+
+ J       0       0         0   0.00%   -inf            67                 Large        0      0      0         0     0.0s
+ S       0       0         0   0.00%   0               24               100.00%        0      0      0         0     0.0s
+
+16.7% inactive integer columns, restarting
+Model after restart has 6 rows, 8 cols (4 bin., 0 int., 0 impl., 4 cont., 0 dom.fix.), and 14 nonzeros
+
+         0       0         0   0.00%   20.04           24                16.50%        0      0      0         2     0.0s
+         0       0         0   0.00%   20.59701493     24                14.18%        0      0      0         2     0.0s
+         1       0         1 100.00%   24              24                 0.00%        0      0      0         4     0.0s
+
+Solving report
+  Model             pns_6878304734723728487
+  Status            Optimal
+  Primal bound      24
+  Dual bound        24
+  Gap               0% (tolerance: 0.01%)
+  P-D integral      0.00137657791738
+  Solution status   feasible
+                    24 (objective)
+                    0 (bound viol.)
+                    0 (int. viol.)
+                    0 (row viol.)
+  Timing            0.02
+  Max sub-MIP depth 0
+  Nodes             1
+  Repair LPs        0
+  LP iterations     4
+                    0 (strong br.)
+                    2 (separation)
+                    0 (heuristics)
+Writing the solution to C:\Users\jcgca\AppData\Local\Temp\pns_302281004230613684.sol
+Running HiGHS 1.14.0 (git hash: 7df0786): Copyright (c) 2026 under Apache 2.0 license terms
+Using BLAS: OpenBLAS 
+Command line parsed using CLI11 2.5.0: Copyright (c) 2017-2025 University of Cincinnati
+Set option solution_file to "C:\Users\jcgca\AppData\Local\Temp\pns_9496199542759608242.sol"
+MIP pns_16571370213836484367 has 9 rows; 12 cols; 21 nonzeros; 6 integer variables (6 binary)
+Coefficient ranges:
+  Matrix  [1e+00, 1e+03]
+  Cost    [1e+00, 4e+00]
+  Bound   [1e+00, 1e+00]
+  RHS     [1e+01, 1e+01]
+Presolving model
+9 rows, 12 cols, 21 nonzeros 0s
+8 rows, 11 cols, 19 nonzeros 0s
+Presolve reductions: rows 8(-1); columns 11(-1); nonzeros 19(-2) 
+
+Solving MIP model with:
+   8 rows
+   11 cols (6 binary, 0 integer, 0 implied int., 5 continuous, 0 domain fixed)
+   19 nonzeros
+
+Src: B => Branching; C => Central rounding; F => Feasibility pump; H => Heuristic;
+     I => Shifting; J => Feasibility jump; L => Sub-MIP; P => Empty MIP; R => Randomized rounding;
+     S => Solve LP; T => Evaluate node; U => Unbounded; X => User solution; Y => HiGHS solution;
+     Z => ZI Round; l => Trivial lower; p => Trivial point; u => Trivial upper; z => Trivial zero
+
+        Nodes      |    B&B Tree     |            Objective Bounds              |  Dynamic Constraints |       Work      
+Src  Proc. InQueue |  Leaves   Expl. | BestBound       BestSol              Gap |   Cuts   InLp Confl. | LpIters     Time
+
+ J       0       0         0   0.00%   -inf            67                 Large        0      0      0         0     0.0s
+ S       0       0         0   0.00%   0               24               100.00%        0      0      0         0     0.0s
+
+16.7% inactive integer columns, restarting
+Model after restart has 6 rows, 8 cols (4 bin., 0 int., 0 impl., 4 cont., 0 dom.fix.), and 14 nonzeros
+
+         0       0         0   0.00%   20.04           24                16.50%        0      0      0         2     0.0s
+         0       0         0   0.00%   20.59701493     24                14.18%        0      0      0         2     0.0s
+         1       0         1 100.00%   24              24                 0.00%        0      0      0         4     0.0s
+
+Solving report
+  Model             pns_16571370213836484367
+  Status            Optimal
+  Primal bound      24
+  Dual bound        24
+  Gap               0% (tolerance: 0.01%)
+  P-D integral      0.000894207215979
+  Solution status   feasible
+                    24 (objective)
+                    0 (bound viol.)
+                    0 (int. viol.)
+                    0 (row viol.)
+  Timing            0.01
+  Max sub-MIP depth 0
+  Nodes             1
+  Repair LPs        0
+  LP iterations     4
+                    0 (strong br.)
+                    2 (separation)
+                    0 (heuristics)
+Writing the solution to C:\Users\jcgca\AppData\Local\Temp\pns_9496199542759608242.sol
+Running HiGHS 1.14.0 (git hash: 7df0786): Copyright (c) 2026 under Apache 2.0 license terms
+Using BLAS: OpenBLAS 
+Command line parsed using CLI11 2.5.0: Copyright (c) 2017-2025 University of Cincinnati
+Set option solution_file to "C:\Users\jcgca\AppData\Local\Temp\pns_3900607107992916425.sol"
+MIP pns_17252769619978454949 has 9 rows; 12 cols; 21 nonzeros; 6 integer variables (6 binary)
+Coefficient ranges:
+  Matrix  [1e+00, 1e+03]
+  Cost    [1e+00, 4e+00]
+  Bound   [1e+00, 1e+00]
+  RHS     [1e+01, 1e+01]
+Presolving model
+9 rows, 12 cols, 21 nonzeros 0s
+8 rows, 11 cols, 19 nonzeros 0s
+Presolve reductions: rows 8(-1); columns 11(-1); nonzeros 19(-2) 
+
+Solving MIP model with:
+   8 rows
+   11 cols (6 binary, 0 integer, 0 implied int., 5 continuous, 0 domain fixed)
+   19 nonzeros
+
+Src: B => Branching; C => Central rounding; F => Feasibility pump; H => Heuristic;
+     I => Shifting; J => Feasibility jump; L => Sub-MIP; P => Empty MIP; R => Randomized rounding;
+     S => Solve LP; T => Evaluate node; U => Unbounded; X => User solution; Y => HiGHS solution;
+     Z => ZI Round; l => Trivial lower; p => Trivial point; u => Trivial upper; z => Trivial zero
+
+        Nodes      |    B&B Tree     |            Objective Bounds              |  Dynamic Constraints |       Work      
+Src  Proc. InQueue |  Leaves   Expl. | BestBound       BestSol              Gap |   Cuts   InLp Confl. | LpIters     Time
+
+ J       0       0         0   0.00%   -inf            67                 Large        0      0      0         0     0.0s
+ S       0       0         0   0.00%   0               24               100.00%        0      0      0         0     0.0s
+
+16.7% inactive integer columns, restarting
+Model after restart has 6 rows, 8 cols (4 bin., 0 int., 0 impl., 4 cont., 0 dom.fix.), and 14 nonzeros
+
+         0       0         0   0.00%   20.04           24                16.50%        0      0      0         2     0.0s
+         0       0         0   0.00%   20.59701493     24                14.18%        0      0      0         2     0.0s
+         1       0         1 100.00%   24              24                 0.00%        0      0      0         4     0.0s
+
+Solving report
+  Model             pns_17252769619978454949
+  Status            Optimal
+  Primal bound      24
+  Dual bound        24
+  Gap               0% (tolerance: 0.01%)
+  P-D integral      0.000962847783378
+  Solution status   feasible
+                    24 (objective)
+                    0 (bound viol.)
+                    0 (int. viol.)
+                    0 (row viol.)
+  Timing            0.01
+  Max sub-MIP depth 0
+  Nodes             1
+  Repair LPs        0
+  LP iterations     4
+                    0 (strong br.)
+                    2 (separation)
+                    0 (heuristics)
+Writing the solution to C:\Users\jcgca\AppData\Local\Temp\pns_3900607107992916425.sol
+Running HiGHS 1.14.0 (git hash: 7df0786): Copyright (c) 2026 under Apache 2.0 license terms
+Using BLAS: OpenBLAS 
+Command line parsed using CLI11 2.5.0: Copyright (c) 2017-2025 University of Cincinnati
+Set option solution_file to "C:\Users\jcgca\AppData\Local\Temp\pns_989747913609613813.sol"
+MIP pns_9220815920580603474 has 9 rows; 12 cols; 21 nonzeros; 6 integer variables (6 binary)
+Coefficient ranges:
+  Matrix  [1e+00, 1e+03]
+  Cost    [1e+00, 4e+00]
+  Bound   [1e+00, 1e+00]
+  RHS     [1e+01, 1e+01]
+Presolving model
+9 rows, 12 cols, 21 nonzeros 0s
+8 rows, 11 cols, 19 nonzeros 0s
+Presolve reductions: rows 8(-1); columns 11(-1); nonzeros 19(-2) 
+
+Solving MIP model with:
+   8 rows
+   11 cols (6 binary, 0 integer, 0 implied int., 5 continuous, 0 domain fixed)
+   19 nonzeros
+
+Src: B => Branching; C => Central rounding; F => Feasibility pump; H => Heuristic;
+     I => Shifting; J => Feasibility jump; L => Sub-MIP; P => Empty MIP; R => Randomized rounding;
+     S => Solve LP; T => Evaluate node; U => Unbounded; X => User solution; Y => HiGHS solution;
+     Z => ZI Round; l => Trivial lower; p => Trivial point; u => Trivial upper; z => Trivial zero
+
+        Nodes      |    B&B Tree     |            Objective Bounds              |  Dynamic Constraints |       Work      
+Src  Proc. InQueue |  Leaves   Expl. | BestBound       BestSol              Gap |   Cuts   InLp Confl. | LpIters     Time
+
+ J       0       0         0   0.00%   -inf            67                 Large        0      0      0         0     0.0s
+ S       0       0         0   0.00%   0               24               100.00%        0      0      0         0     0.0s
+
+16.7% inactive integer columns, restarting
+Model after restart has 6 rows, 8 cols (4 bin., 0 int., 0 impl., 4 cont., 0 dom.fix.), and 14 nonzeros
+
+         0       0         0   0.00%   20.04           24                16.50%        0      0      0         2     0.0s
+         0       0         0   0.00%   20.59701493     24                14.18%        0      0      0         2     0.0s
+         1       0         1 100.00%   24              24                 0.00%        0      0      0         4     0.0s
+
+Solving report
+  Model             pns_9220815920580603474
+  Status            Optimal
+  Primal bound      24
+  Dual bound        24
+  Gap               0% (tolerance: 0.01%)
+  P-D integral      0.000952713209075
+  Solution status   feasible
+                    24 (objective)
+                    0 (bound viol.)
+                    0 (int. viol.)
+                    0 (row viol.)
+  Timing            0.01
+  Max sub-MIP depth 0
+  Nodes             1
+  Repair LPs        0
+  LP iterations     4
+                    0 (strong br.)
+                    2 (separation)
+                    0 (heuristics)
+Writing the solution to C:\Users\jcgca\AppData\Local\Temp\pns_989747913609613813.sol
+Running HiGHS 1.14.0 (git hash: 7df0786): Copyright (c) 2026 under Apache 2.0 license terms
+Using BLAS: OpenBLAS 
+Command line parsed using CLI11 2.5.0: Copyright (c) 2017-2025 University of Cincinnati
+Set option solution_file to "C:\Users\jcgca\AppData\Local\Temp\pns_11706658095599002263.sol"
+MIP pns_12978458498631587352 has 9 rows; 12 cols; 21 nonzeros; 6 integer variables (6 binary)
+Coefficient ranges:
+  Matrix  [1e+00, 1e+03]
+  Cost    [1e+00, 4e+00]
+  Bound   [1e+00, 1e+00]
+  RHS     [1e+01, 1e+01]
+Presolving model
+9 rows, 12 cols, 21 nonzeros 0s
+8 rows, 11 cols, 19 nonzeros 0s
+Presolve reductions: rows 8(-1); columns 11(-1); nonzeros 19(-2) 
+
+Solving MIP model with:
+   8 rows
+   11 cols (6 binary, 0 integer, 0 implied int., 5 continuous, 0 domain fixed)
+   19 nonzeros
+
+Src: B => Branching; C => Central rounding; F => Feasibility pump; H => Heuristic;
+     I => Shifting; J => Feasibility jump; L => Sub-MIP; P => Empty MIP; R => Randomized rounding;
+     S => Solve LP; T => Evaluate node; U => Unbounded; X => User solution; Y => HiGHS solution;
+     Z => ZI Round; l => Trivial lower; p => Trivial point; u => Trivial upper; z => Trivial zero
+
+        Nodes      |    B&B Tree     |            Objective Bounds              |  Dynamic Constraints |       Work      
+Src  Proc. InQueue |  Leaves   Expl. | BestBound       BestSol              Gap |   Cuts   InLp Confl. | LpIters     Time
+
+ J       0       0         0   0.00%   -inf            67                 Large        0      0      0         0     0.0s
+ S       0       0         0   0.00%   0               24               100.00%        0      0      0         0     0.0s
+
+16.7% inactive integer columns, restarting
+Model after restart has 6 rows, 8 cols (4 bin., 0 int., 0 impl., 4 cont., 0 dom.fix.), and 14 nonzeros
+
+         0       0         0   0.00%   20.04           24                16.50%        0      0      0         2     0.0s
+         0       0         0   0.00%   20.59701493     24                14.18%        0      0      0         2     0.0s
+         1       0         1 100.00%   24              24                 0.00%        0      0      0         4     0.0s
+
+Solving report
+  Model             pns_12978458498631587352
+  Status            Optimal
+  Primal bound      24
+  Dual bound        24
+  Gap               0% (tolerance: 0.01%)
+  P-D integral      0.000859256574518
+  Solution status   feasible
+                    24 (objective)
+                    0 (bound viol.)
+                    0 (int. viol.)
+                    0 (row viol.)
+  Timing            0.01
+  Max sub-MIP depth 0
+  Nodes             1
+  Repair LPs        0
+  LP iterations     4
+                    0 (strong br.)
+                    2 (separation)
+                    0 (heuristics)
+Writing the solution to C:\Users\jcgca\AppData\Local\Temp\pns_11706658095599002263.sol
