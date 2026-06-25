@@ -1,3 +1,8 @@
+/*
+TRABAJO FINAL DE ESTRUCTURA DE DATOS
+Jose Luis Castellanos Guardia - 0222120042
+Angel David Massiris Lopez-0222410030
+ */
 package com.udecartagena.pgraph;
 
 import javax.swing.SwingUtilities;
