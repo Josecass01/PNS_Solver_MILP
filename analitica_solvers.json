@@ -1132,4 +1132,137 @@
       "x_01": 0.0000
     }
   }
+,
+  {
+    "solver": "Apache Commons Math",
+    "factible": true,
+    "costo_optimo": 185.0000,
+    "tiempo_ms": 44,
+    "variables_activas": {
+      "y_OP4": 0.0000,
+      "y_OP3": 1.0000,
+      "x_OP4": 0.0000,
+      "x_OP3": 50.0000,
+      "x_OP2": 0.0000,
+      "x_OP1": 50.0000,
+      "y_OP2": 0.0000,
+      "y_OP1": 1.0000
+    }
+  }
+,
+  {
+    "solver": "HiGHS",
+    "factible": true,
+    "costo_optimo": 185.0000,
+    "tiempo_ms": 66,
+    "variables_activas": {
+      "y_OP4": 0.0000,
+      "y_OP3": 1.0000,
+      "x_OP4": 0.0000,
+      "x_OP3": 50.0000,
+      "x_OP2": 0.0000,
+      "x_OP1": 50.0000,
+      "y_OP2": 0.0000,
+      "y_OP1": 1.0000
+    }
+  }
+,
+  {
+    "solver": "GLPK",
+    "factible": true,
+    "costo_optimo": 185.0000,
+    "tiempo_ms": 79,
+    "variables_activas": {
+      "y_OP4": 0.0000,
+      "y_OP3": 1.0000,
+      "x_OP4": 0.0000,
+      "x_OP3": 50.0000,
+      "x_OP2": 0.0000,
+      "x_OP1": 50.0000,
+      "y_OP2": 0.0000,
+      "y_OP1": 1.0000
+    }
+  }
+,
+  {
+    "solver": "Gurobi",
+    "factible": true,
+    "costo_optimo": 185.0000,
+    "tiempo_ms": 299,
+    "variables_activas": {
+      "y_OP4": 0.0000,
+      "y_OP3": 1.0000,
+      "x_OP4": 0.0000,
+      "x_OP3": 50.0000,
+      "x_OP2": 0.0000,
+      "x_OP1": 50.0000,
+      "y_OP2": 0.0000,
+      "y_OP1": 1.0000
+    }
+  }
+,
+  {
+    "solver": "Apache Commons Math",
+    "factible": true,
+    "costo_optimo": 185.0000,
+    "tiempo_ms": 2,
+    "variables_activas": {
+      "y_OP4": 0.0000,
+      "y_OP3": 1.0000,
+      "x_OP4": 0.0000,
+      "x_OP3": 50.0000,
+      "x_OP2": 0.0000,
+      "x_OP1": 50.0000,
+      "y_OP2": 0.0000,
+      "y_OP1": 1.0000
+    }
+  },
+  {
+    "solver": "HiGHS",
+    "factible": true,
+    "costo_optimo": 185.0000,
+    "tiempo_ms": 56,
+    "variables_activas": {
+      "y_OP4": 0.0000,
+      "y_OP3": 1.0000,
+      "x_OP4": 0.0000,
+      "x_OP3": 50.0000,
+      "x_OP2": 0.0000,
+      "x_OP1": 50.0000,
+      "y_OP2": 0.0000,
+      "y_OP1": 1.0000
+    }
+  },
+  {
+    "solver": "GLPK",
+    "factible": true,
+    "costo_optimo": 185.0000,
+    "tiempo_ms": 28,
+    "variables_activas": {
+      "y_OP4": 0.0000,
+      "y_OP3": 1.0000,
+      "x_OP4": 0.0000,
+      "x_OP3": 50.0000,
+      "x_OP2": 0.0000,
+      "x_OP1": 50.0000,
+      "y_OP2": 0.0000,
+      "y_OP1": 1.0000
+    }
+  },
+  {
+    "solver": "Gurobi",
+    "factible": true,
+    "costo_optimo": 185.0000,
+    "tiempo_ms": 3,
+    "variables_activas": {
+      "y_OP4": 0.0000,
+      "y_OP3": 1.0000,
+      "x_OP4": 0.0000,
+      "x_OP3": 50.0000,
+      "x_OP2": 0.0000,
+      "x_OP1": 50.0000,
+      "y_OP2": 0.0000,
+      "y_OP1": 1.0000
+    }
+  }
 ]

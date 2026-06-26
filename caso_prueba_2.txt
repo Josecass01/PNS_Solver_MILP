@@ -1,0 +1,17 @@
+materials:
+M1: raw_material
+M2: intermediate
+M3: intermediate
+M4: product, flow_rate_lower_bound = 50
+
+operating_units:
+OP1: capacity_upper_bound = 1000, fix_cost = 20, proportional_cost = 2
+OP2: capacity_upper_bound = 1000, fix_cost = 10, proportional_cost = 4
+OP3: capacity_upper_bound = 1000, fix_cost = 15, proportional_cost = 1
+OP4: capacity_upper_bound = 1000, fix_cost = 5, proportional_cost = 2
+
+material_to_operating_unit_flow_rates:
+OP1: M1 => M2
+OP2: M1 => M3
+OP3: M2 => M4
+OP4: M3 => M4
